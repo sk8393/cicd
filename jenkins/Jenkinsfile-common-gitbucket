@@ -1,0 +1,59 @@
+pipeline {
+	agent { label "master" }
+
+	environment {
+		GITBUCKET_SEVER = "gitbucket.sk8393.pw"
+		REPOSITORY = "sample-end-to-end-pipeline-02"
+	}
+
+	stages {
+		stage("clean workspace") {
+			steps {
+				cleanWs()
+			}
+		}
+
+		stage("git clone") {
+			steps {
+				sh "git clone http://${GITBUCKET_SEVER}:8888/git/root/${REPOSITORY}.git"
+				sh "pwd"
+				sh "ls -lR"
+			}
+		}
+
+		stage("core task") {
+			parallel {
+				stage("build image") {
+					when { expression { env.JOB_NAME == "sample-build-docker-image-02" } }
+					steps {
+						sh "cd ${REPOSITORY};docker build -t sk8393/hello-world:2.0 -f hello-world/Dockerfile ."
+					}
+				}
+				stage("create docker compose project") {
+					when { expression { env.JOB_NAME == "sample-create-docker-compose-project-02" } }
+					steps {
+						sh "cd ${REPOSITORY}/jenkins/;docker-compose up -d"
+					}
+				}
+				stage("conduct test") {
+					when { expression { env.JOB_NAME == "sample-conduct-test-02" } }
+					steps {
+						sh "cd ${REPOSITORY}/jenkins/;chmod 774 test.sh;./test.sh"
+					}
+				}
+				stage("tag for production") {
+					when { expression { env.JOB_NAME == "sample-tag-for-production-02" } }
+					steps {
+						sh "cd ${REPOSITORY}/jenkins/;chmod 774 tag.sh;./tag.sh"
+					}
+				}
+			}
+		}
+	}
+
+	post {
+		always {
+			echo "Do clean up as needed."
+		}
+	}
+}
