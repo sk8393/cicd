@@ -37,7 +37,7 @@ pipeline {
 				stage("conduct test") {
 					when { expression { env.JOB_NAME == "sample-conduct-test-20210414" } }
 					steps {
-						echo "dummy"
+						sh "cd ${REPOSITORY}/jenkins/;chmod 774 test.sh;./test.sh"
 					}
 				}
 				stage("tag for production") {
