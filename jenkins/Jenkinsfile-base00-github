@@ -1,0 +1,29 @@
+pipeline {
+	agent { label "master" }
+
+	environment {
+		REPOSITORY = "cicd"
+	}
+
+	stages {
+		stage("clean workspace") {
+			steps {
+				cleanWs()
+			}
+		}
+
+		stage("git clone") {
+			steps {
+				sh "git clone https://github.com/sk8393/cicd.git"
+				sh "pwd"
+				sh "ls -lR"
+			}
+		}
+
+		stage("build image") {
+			steps {
+				sh "cd ${REPOSITORY};docker build -t sk8393/base00:20210414 -f base00/Dockerfile ."
+			}
+		}
+	}
+}
