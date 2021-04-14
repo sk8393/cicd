@@ -1,0 +1,54 @@
+pipeline {
+	agent { label "master" }
+
+	environment {
+		REPOSITORY = "cicd"
+	}
+
+	stages {
+		stage("pipeline to build docker image") {
+			steps {
+				build "sample-build-docker-image-20210414"
+			}
+		}
+		stage("pipeline to create docker compose project") {
+			steps {
+				build "sample-create-docker-compose-project-20210414"
+			}
+		}
+		stage("pipeline to conduct test") {
+			steps {
+				build "sample-conduct-test-20210414"
+			}
+		}
+		stage("pipeline to tag for production") {
+			steps {
+				build "sample-tag-for-production-20210414"
+			}
+		}
+		stage("clean workspace") {
+			steps {
+				cleanWs()
+			}
+		}
+		stage("git clone") {
+			steps {
+				sh "git clone https://github.com/sk8393/cicd.git"
+				sh "pwd"
+				sh "ls -lR"
+			}
+		}
+		stage("clean up docker compose project?") {
+			steps{
+				timeout(time: 1, unit: "HOURS") {
+					input "Would you like to clean up docker compose project?"
+				}
+			}
+		}
+		stage("clean up docker compose project") {
+			steps {
+				sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test down"
+			}
+		}
+	}
+}
