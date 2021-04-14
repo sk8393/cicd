@@ -1,0 +1,20 @@
+version: '3'
+services:
+  gitbucket:
+    image: sk8393/gitbucket:2.0
+    container_name: gitbucket
+    ports:
+      - 8888:8080
+      - 29418:29418
+    volumes:
+      - ./gitbucket/container-volume:/gitbucket
+
+  jenkins:
+    image: sk8393/jenkins:2.0
+    container_name: jenkins
+    ports:
+      - '8889:8080'
+      - '5000:5000'
+    volumes:
+      - ./jenkins/container-volume:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
