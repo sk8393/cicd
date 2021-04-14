@@ -1,0 +1,6 @@
+version: '3'
+
+services:
+  hello-world:
+    image: sk8393/hello-world:20210414
+    container_name: hello-world

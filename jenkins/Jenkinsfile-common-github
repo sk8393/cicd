@@ -31,7 +31,7 @@ pipeline {
 				stage("create docker compose project") {
 					when { expression { env.JOB_NAME == "sample-create-docker-compose-project-20210414" } }
 					steps {
-						echo "dummy"
+						sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test up -d"
 					}
 				}
 				stage("conduct test") {
