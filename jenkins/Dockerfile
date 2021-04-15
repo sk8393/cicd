@@ -12,4 +12,5 @@ RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt \
  && tar --strip-components=1 -xvzf docker.tgz -C /usr/bin \
  && rm -f docker.tgz \
  && curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose \
- && chmod +x /usr/local/bin/docker-compose
+ && chmod +x /usr/local/bin/docker-compose \
+ && mkdir -p /root/export

@@ -13,8 +13,9 @@ services:
     image: sk8393/jenkins:2.0
     container_name: jenkins
     ports:
-      - '8889:8080'
       - '5000:5000'
+      - '8889:8080'
     volumes:
+      - ./jenkins/container-data-exported-config-file:/root/export
       - ./jenkins/container-volume:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
