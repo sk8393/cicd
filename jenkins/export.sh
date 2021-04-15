@@ -29,7 +29,9 @@ do
   INDEX_ZERO_PAD=$(printf "%02d" "${INDEX}")
   echo "${INDEX_ZERO_PAD}: ${JOB_NAME}"
   mkdir -p ${EXPORT_BASE_DIRECTORY}/${JOB_NAME}
-  curl -so ${EXPORT_BASE_DIRECTORY}/${JOB_NAME}/config.xml --user '${JENKINS_USER}:${JENKINS_PASSWORD}' http://${JENKINS_URL}:${JENKINS_PORT}/job/${JOB_NAME}/config.xml
+  EXPORT_COMMAND="curl -so ${EXPORT_BASE_DIRECTORY}/${JOB_NAME}/config.xml --user '${JENKINS_USER}:${JENKINS_PASSWORD}' http://${JENKINS_URL}:${JENKINS_PORT}/job/${JOB_NAME}/config.xml"
+  echo "    EXPORT_COMMAND: ${EXPORT_COMMAND}"
+  eval ${EXPORT_COMMAND}
   echo "    Exported config file to ${EXPORT_BASE_DIRECTORY}/${JOB_NAME}/config.xml"
 
   INDEX=$((${INDEX} + 1))
