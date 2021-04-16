@@ -30,7 +30,9 @@ for x in `find ${EXPORTED_BASE_DIRECTORY} -name config.xml`
 do
   CONFIG_FILE=${x}
   echo "CONFIG_FILE: ${CONFIG_FILE}"
-  JOB_NAME=`echo ${CONFIG_FILE} | cut -d '/' -f2`
+  # Field number of cut command needs to be modified according to from where this shell script is called.
+  # -f2 in case of jenkins/ directory, but it has to be -f3 if this is called from top directory.
+  JOB_NAME=`echo ${CONFIG_FILE} | cut -d '/' -f3`
   mkdir -p ${IMPORT_BASE_DIRECTORY}/${JENKINS_IMAGE_ID}/${TIMESTAMP}/${JOB_NAME}
   cp ${CONFIG_FILE} ${IMPORT_BASE_DIRECTORY}/${JENKINS_IMAGE_ID}/${TIMESTAMP}/${JOB_NAME}/
 done
