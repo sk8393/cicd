@@ -13,7 +13,10 @@ echo -e "TIMESTAMP: ${TIMESTAMP}\n"
 # config-file-to-import/5bbc9ce244658c2a85a4d40f6caa3989f56dbfa9cc6d205b06b9e32e9ce172d0/1618493339/sample-export-config-file-20210415/config.xml
 # remove directory from timestamp part, and just keep following directory:
 # config-file-to-import/5bbc9ce244658c2a85a4d40f6caa3989f56dbfa9cc6d205b06b9e32e9ce172d0
-rm -fR ${IMPORT_BASE_DIRECTORY}/${JENKINS_IMAGE_ID}/*
+REMOVE_COMMAND="rm -fR ${IMPORT_BASE_DIRECTORY}/${JENKINS_IMAGE_ID}"
+echo ${REMOVE_COMMAND}
+eval ${REMOVE_COMMAND}
+# rm -fR ${IMPORT_BASE_DIRECTORY}/${JENKINS_IMAGE_ID}
 
 # Then create new directory like below with current timestamp:
 # config-file-to-import/5bbc9ce244658c2a85a4d40f6caa3989f56dbfa9cc6d205b06b9e32e9ce172d0/1618546531
