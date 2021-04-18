@@ -1,5 +1,4 @@
-<?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.40">
+<?xml version="1.1" encoding="UTF-8"?><flow-definition plugin="workflow-job@2.40">
   <actions>
     <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.8.4"/>
     <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.8.4">
@@ -9,7 +8,7 @@
       <options/>
     </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
   </actions>
-  <description></description>
+  <description/>
   <keepDependencies>false</keepDependencies>
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
@@ -22,30 +21,30 @@
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.90">
     <script>pipeline {
-	agent { label &quot;master&quot; }
+	agent { label "master" }
 
 	environment {
-		REPOSITORY = &quot;cicd&quot;
+		REPOSITORY = "cicd"
 	}
 
 	stages {
-		stage(&quot;clean workspace&quot;) {
+		stage("clean workspace") {
 			steps {
 				cleanWs()
 			}
 		}
 
-		stage(&quot;git clone&quot;) {
+		stage("git clone") {
 			steps {
-				sh &quot;git clone https://github.com/sk8393/cicd.git&quot;
-				sh &quot;pwd&quot;
-				sh &quot;ls -lR&quot;
+				sh "git clone https://github.com/sk8393/cicd.git"
+				sh "pwd"
+				sh "ls -lR"
 			}
 		}
 
-		stage(&quot;build image&quot;) {
+		stage("build image") {
 			steps {
-				sh &quot;cd ${REPOSITORY}/jenkins/;chmod 774 export.sh;./export.sh&quot;
+				sh "cd ${REPOSITORY}/jenkins/;chmod 774 export.sh;./export.sh"
 			}
 		}
 	}
