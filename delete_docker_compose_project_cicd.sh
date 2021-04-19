@@ -4,8 +4,6 @@ then
   source ./variables.sh
 fi
 
-set -euo pipefail
-
 if [[ `whoami` != "root" ]]
 then
   echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "EXIT"): "Need to be root user to use docker command.""

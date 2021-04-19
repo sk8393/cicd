@@ -4,8 +4,6 @@ then
   source ../variables.sh
 fi
 
-set -euo pipefail
-
 if [[ `whoami` != "root" ]]
 then
   echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "EXIT"): "Need to be root user to use docker command.""
@@ -13,11 +11,12 @@ then
 fi
 
 # After introducing 'production' tag for Docker image, it should be relfected below.
-NUMBER_OF_RUNNING_JENKINS_CONTAINER=`docker ps -a | grep -c jenkins`
+# "|| true" is a way to avoid SIGPIPE after grep was called (related to "set -o pipefail").
+NUMBER_OF_RUNNING_JENKINS_CONTAINER=`docker ps -a | grep -c jenkins || true`
 echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "NUMBER_OF_RUNNING_JENKINS_CONTAINER"): ${NUMBER_OF_RUNNING_JENKINS_CONTAINER}"
 if [[ ${NUMBER_OF_RUNNING_JENKINS_CONTAINER} != "1" ]]
 then
-  echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "EXIT"): "Only one Jenkins container is expected to be running.""
+  echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "EXIT"): "One Jenkins container is expected to be running.""
   exit 1
 fi
 JENKINS_IMAGE_ID=`docker ps -a | grep jenkins | cut -d " " -f1 | xargs docker inspect --format='{{.Image}}' | cut -d ':' -f2`

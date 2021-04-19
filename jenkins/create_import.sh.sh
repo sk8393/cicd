@@ -4,8 +4,6 @@ then
   source ../variables.sh
 fi
 
-set -euo pipefail
-
 LATEST_TIMESTAMP=`find ${JENKINS_IMPORT_BASE_DIRECTORY} -name config.xml | rev | cut -d '/' -f3 | rev | sort -n -r | head -n 1`
 echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "LATEST_TIMESTAMP"): ${LATEST_TIMESTAMP}"
 

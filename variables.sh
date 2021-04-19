@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./variables.part.sh
+set -euo pipefail
 
 MAX_VARIABLE_LENGTH=42
 
@@ -7,9 +7,10 @@ SCRIPT_FILE=$(basename $0)
 echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "SCRIPT_FILE"): ${SCRIPT_FILE}"
 SCRIPT_ABSTRACT_PATH=$(cd $(dirname $0); pwd)/${SCRIPT_FILE}
 echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "SCRIPT_ABSTRACT_PATH"): ${SCRIPT_ABSTRACT_PATH}"
-
 REPOSITORY_BASE_DIRECTORY=$(git rev-parse --show-toplevel)
 echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "REPOSITORY_BASE_DIRECTORY"): ${REPOSITORY_BASE_DIRECTORY}"
+
+source ${REPOSITORY_BASE_DIRECTORY}/variables.part.sh
 
 GITBUCKET_RELATED_ASSETS_STORED_IN="gitbucket"
 echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "GITBUCKET_RELATED_ASSETS_STORED_IN"): ${GITBUCKET_RELATED_ASSETS_STORED_IN}"
