@@ -24,10 +24,10 @@ pipeline {
 			steps {
 				script {
 					gitbucket_url = sh (
-						script: "cd cicd/;cat variables.part.sh",
+						script: "cd cicd/;cat variables.part.sh | grep GITBUCKET_URL | cut -d '=' -f2 | sed -e 's/\"//g'",
 						returnStdout: true
 					).trim()
-					echo "Git committer email: ${gitbucket_url}"
+					echo "GITBUCKET_URL: ${gitbucket_url}"
 				}
 			}
 		}
