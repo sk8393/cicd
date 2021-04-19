@@ -22,9 +22,14 @@ pipeline {
 
 		stage("build image") {
 			steps {
-				def gitbucket_url = sh(script: 'cd cicd/;cat variables.part.sh | grep GITBUCKET_URL | cut -d "=" -f2 | sed -e "s/\"//g"', returnStdout: true)
+				script {
+					gitbucket_url = sh (
+						script: "cd cicd/;cat variables.part.sh",
+						returnStdout: true
+					).trim()
+					echo "Git committer email: ${gitbucket_url}"
+				}
 			}
 		}
 	}
 }
-
