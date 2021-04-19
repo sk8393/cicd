@@ -20,7 +20,7 @@ pipeline {
 			}
 		}
 
-		stage("build image") {
+		stage("retrieve variable") {
 			steps {
 				script {
 					gitbucket_url = sh (
@@ -29,6 +29,12 @@ pipeline {
 					).trim()
 					echo "GITBUCKET_URL: ${gitbucket_url}"
 				}
+			}
+		}
+
+		stage("read variable from down stream step") {
+			steps {
+				echo "GITBUCKET_URL: ${gitbucket_url}"
 			}
 		}
 	}
