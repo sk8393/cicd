@@ -3,5 +3,4 @@ gitbucket/container-volume/
 jenkins/container-data-exported-config-file/
 jenkins/container-volume/
 jenkins/import.sh
-variables.part.sh
 workspace/
