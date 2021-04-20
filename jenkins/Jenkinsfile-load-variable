@@ -1,0 +1,41 @@
+pipeline {
+	agent { label "master" }
+
+	environment {
+		REPOSITORY = "cicd"
+	}
+
+	stages {
+		stage("clean workspace") {
+			steps {
+				cleanWs()
+			}
+		}
+
+		stage("git clone") {
+			steps {
+				sh 'git clone -b dev https://github.com/sk8393/cicd.git'
+				sh "pwd"
+				sh "ls -lR"
+			}
+		}
+
+		stage("retrieve variable") {
+			steps {
+				script {
+					gitbucket_url = sh (
+						script: "cd cicd/;cat variables.part.sh | grep GITBUCKET_URL | cut -d '=' -f2 | sed -e 's/\"//g'",
+						returnStdout: true
+					).trim()
+					echo "GITBUCKET_URL: ${gitbucket_url}"
+				}
+			}
+		}
+
+		stage("read variable from down stream step") {
+			steps {
+				echo "GITBUCKET_URL: ${gitbucket_url}"
+			}
+		}
+	}
+}
