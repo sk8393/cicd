@@ -1,4 +1,5 @@
 *.swp
+.aws/credentials
 gitbucket/container-volume/
 jenkins/container-data-exported-config-file/
 jenkins/container-volume/

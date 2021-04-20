@@ -1,18 +1,40 @@
 FROM ubuntu:18.04
 
 COPY base00/init.sh /usr/local/bin/init.sh
+COPY .aws/config /tmp/config
+COPY .aws/credentials /tmp/credentials
 COPY .ssh/id_rsa /tmp/id_rsa
 COPY .ssh/id_rsa.pub /tmp/id_rsa.pub
 
-RUN apt-get -y update \
- && apt-get -y upgrade \
- && apt-get -y --no-install-recommends install openssh-server=1:7.6p1-4ubuntu0.3 \
- && rm -rf /var/lib/apt/lists/* \
+RUN apt update \
+ && apt install -y --no-install-recommends curl \
+ && apt install -y --no-install-recommends less \
+ && apt install -y --no-install-recommends openssh-server \
  && mkdir ~/.ssh \
  && cp /tmp/id_rsa ~/.ssh/id_rsa \
  && cp /tmp/id_rsa.pub ~/.ssh/authorized_keys \
  && chmod 0600 ~/.ssh/authorized_keys \
  && chmod 0600 ~/.ssh/id_rsa \
+ && apt install -y --no-install-recommends unzip \
+ && apt install -y --no-install-recommends vim \
+ && apt install -y --no-install-recommends python3.8 \
+ && ln -s /usr/bin/python3.8 /usr/bin/python3 \
+ && ln -s /usr/bin/python3 /usr/bin/python \
+ && apt install -y --no-install-recommends python3-pip \
+ && ln -s /usr/bin/pip3 /usr/bin/pip \
+ && pip install boto3 \
+ && curl -L "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+ && unzip awscliv2.zip \
+ && ./aws/install \
+ && rm awscliv2.zip \
+ && mkdir ~/.aws \
+ && cp /tmp/config ~/.aws/config \
+ && cp /tmp/credentials ~/.aws/credentials \
+ && curl -L "https://github.com/tomnomnom/gron/releases/download/v0.6.1/gron-linux-amd64-0.6.1.tgz" -o "gron-linux-amd64-0.6.1.tgz" \
+ && tar xzf gron-linux-amd64-0.6.1.tgz \
+ && mv gron /usr/local/bin/ \
+ && rm gron-linux-amd64-0.6.1.tgz \
+ && rm -rf /var/lib/apt/lists/* \
  && chmod u+x /usr/local/bin/init.sh
 
 CMD ["/usr/local/bin/init.sh"]
