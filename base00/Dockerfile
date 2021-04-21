@@ -10,6 +10,7 @@ COPY .ssh/id_rsa.pub /tmp/id_rsa.pub
 
 RUN apt update \
  && apt install -y --no-install-recommends curl \
+ && apt install -y --no-install-recommends iproute2 \
  && apt install -y --no-install-recommends less \
  && apt install -y --no-install-recommends openssh-server \
  && mkdir ~/.ssh \
