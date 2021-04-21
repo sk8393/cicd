@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 COPY base00/init.sh /usr/local/bin/init.sh
 COPY .aws/config /tmp/config
 COPY .aws/credentials /tmp/credentials
@@ -34,6 +36,7 @@ RUN apt update \
  && tar xzf gron-linux-amd64-0.6.1.tgz \
  && mv gron /usr/local/bin/ \
  && rm gron-linux-amd64-0.6.1.tgz \
+ && apt install -y --no-install-recommends postgresql-10 \
  && rm -rf /var/lib/apt/lists/* \
  && chmod u+x /usr/local/bin/init.sh
 
