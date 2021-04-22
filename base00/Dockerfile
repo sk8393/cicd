@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY base00/init.sh /usr/local/bin/init.sh
+COPY base00/td-agent.conf /tmp/td-agent.conf
 COPY .aws/config /tmp/config
 COPY .aws/credentials /tmp/credentials
 COPY .ssh/id_rsa /tmp/id_rsa
@@ -56,6 +57,8 @@ RUN apt update \
  && echo "listen_addresses = '*'" >> /etc/postgresql/10/main/postgresql.conf \
  && echo "host all all 0.0.0.0/0 trust" >> /etc/postgresql/10/main/pg_hba.conf \
  && curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sh \
+ && mv /etc/td-agent/td-agent.conf /etc/td-agent/td-agent.conf.bk \
+ && mv /tmp/td-agent.conf /etc/td-agent/ \
  && rm -rf /var/lib/apt/lists/* \
  && chmod u+x /usr/local/bin/init.sh
 
