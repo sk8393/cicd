@@ -12,6 +12,7 @@ RUN apt update \
  && apt install -y --no-install-recommends curl \
  && apt install -y --no-install-recommends gcc \
  && apt install -y --no-install-recommends git \
+ && apt install -y --no-install-recommends gnupg \
  && apt install -y --no-install-recommends iproute2 \
  && apt install -y --no-install-recommends less \
  && apt install -y --no-install-recommends libbz2-dev \
@@ -52,6 +53,7 @@ RUN apt update \
  && apt install -y --no-install-recommends postgresql-10 \
  && echo "listen_addresses = '*'" >> /etc/postgresql/10/main/postgresql.conf \
  && echo "host all all 0.0.0.0/0 trust" >> /etc/postgresql/10/main/pg_hba.conf \
+ && curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sh \
  && rm -rf /var/lib/apt/lists/* \
  && chmod u+x /usr/local/bin/init.sh
 
