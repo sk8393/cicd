@@ -3,6 +3,8 @@ services:
   gitbucket:
     image: sk8393/gitbucket:2.0
     container_name: gitbucket
+    deploy:
+      replicas: 1
     ports:
       - 8888:8080
       - 29418:29418
@@ -12,6 +14,8 @@ services:
   jenkins:
     image: sk8393/jenkins:2.0
     container_name: jenkins
+    deploy:
+      replicas: 1
     ports:
       - '5000:5000'
       - '8889:8080'
@@ -23,6 +27,8 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.1
     container_name: elasticsearch
+    deploy:
+      replicas: 1
     environment:
       - network.host=0.0.0.0
       - discovery.type=single-node
@@ -37,6 +43,8 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:7.8.1
     container_name: kibana
+    deploy:
+      replicas: 1
     environment:
       SERVER_NAME: "kibana"
       ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
@@ -48,5 +56,7 @@ services:
   postgres:
     image: 'sk8393/postgres:2.0'
     container_name: postgres
+    deploy:
+      replicas: 1
     ports:
       - '5432:5432'
