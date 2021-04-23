@@ -32,7 +32,7 @@ pipeline {
 				stage("create docker compose project") {
 					when { expression { env.JOB_NAME == "sample-create-docker-compose-project-20210423" } }
 					steps {
-						sh "cd ${REPOSITORY}/jenkins/;sysctl -w vm.max_map_count=262144;docker-compose -p test up -d"
+						sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test up -d"
 					}
 				}
 				stage("conduct test") {
