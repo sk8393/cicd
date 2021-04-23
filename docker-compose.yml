@@ -60,3 +60,9 @@ services:
       replicas: 1
     ports:
       - '5432:5432'
+
+  requester:
+    image: 'sk8393/requester:2.0'
+    container_name: requester
+    deploy:
+      replicas: 1
