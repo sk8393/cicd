@@ -1,0 +1,59 @@
+pipeline {
+	agent { label "master" }
+
+	environment {
+		REPOSITORY = "cicd"
+	}
+
+	stages {
+		stage("clean workspace") {
+			steps {
+				cleanWs()
+			}
+		}
+
+		stage("git clone") {
+			steps {
+				sh "git clone -b test https://github.com/sk8393/cicd.git"
+				sh "pwd"
+				sh "ls -lR"
+			}
+		}
+
+		stage("core task") {
+			parallel {
+				stage("build image") {
+					when { expression { env.JOB_NAME == "sample-build-docker-image-20210423" } }
+					steps {
+						sh "cd ${REPOSITORY};docker build -t sk8393/postgres:test -f postgres/Dockerfile ."
+						sh "cd ${REPOSITORY};docker build -t sk8393/requester:test -f requester/Dockerfile ."
+					}
+				}
+				stage("create docker compose project") {
+					when { expression { env.JOB_NAME == "sample-create-docker-compose-project-20210423" } }
+					steps {
+						echo "dummy"
+					}
+				}
+				stage("conduct test") {
+					when { expression { env.JOB_NAME == "sample-conduct-test-20210423" } }
+					steps {
+						echo "dummy"
+					}
+				}
+				stage("tag for production") {
+					when { expression { env.JOB_NAME == "sample-tag-for-production-20210423" } }
+					steps {
+						echo "dummy"
+					}
+				}
+			}
+		}
+	}
+
+	post {
+		always {
+			echo "Do clean up as needed."
+		}
+	}
+}
