@@ -15,8 +15,6 @@ pipeline {
 		stage("git clone") {
 			steps {
 				sh "git clone -b test https://github.com/sk8393/cicd.git"
-				sh "pwd"
-				sh "ls -lR"
 			}
 		}
 
@@ -32,19 +30,19 @@ pipeline {
 				stage("create docker compose project") {
 					when { expression { env.JOB_NAME == "sample-create-docker-compose-project-20210423" } }
 					steps {
-						echo "dummy"
+						sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test up -d"
 					}
 				}
 				stage("conduct test") {
 					when { expression { env.JOB_NAME == "sample-conduct-test-20210423" } }
 					steps {
-						echo "dummy"
+						sh "cd ${REPOSITORY}/jenkins/;chmod 774 test.sh;./test.sh"
 					}
 				}
 				stage("tag for production") {
 					when { expression { env.JOB_NAME == "sample-tag-for-production-20210423" } }
 					steps {
-						echo "dummy"
+						sh "cd ${REPOSITORY}/jenkins/;chmod 774 tag.sh;./tag.sh"
 					}
 				}
 			}

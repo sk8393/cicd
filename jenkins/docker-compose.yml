@@ -1,6 +1,43 @@
 version: '3'
 
 services:
-  hello-world:
-    image: sk8393/hello-world:20210414
-    container_name: hello-world
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.1
+    container_name: elasticsearch
+    deploy:
+      replicas: 1
+    environment:
+      - network.host=0.0.0.0
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.8.1
+    container_name: kibana
+    deploy:
+      replicas: 1
+    environment:
+      SERVER_NAME: "kibana"
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      ELASTICSEARCH_REQUESTTIMEOUT: "60000"
+    ports:
+      - "5601:5601"
+
+  postgres:
+    image: 'sk8393/postgres:test'
+    container_name: postgres
+    deploy:
+      replicas: 1
+    ports:
+      - '5432:5432'
+
+  requester:
+    image: 'sk8393/requester:test'
+    container_name: requester
+    deploy:
+      replicas: 1
