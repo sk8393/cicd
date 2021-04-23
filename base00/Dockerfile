@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY base00/init.sh /usr/local/bin/init.sh
+COPY base00/td-agent.conf /tmp/td-agent.conf
 COPY .aws/config /tmp/config
 COPY .aws/credentials /tmp/credentials
 COPY .ssh/id_rsa /tmp/id_rsa
@@ -12,7 +13,9 @@ RUN apt update \
  && apt install -y --no-install-recommends curl \
  && apt install -y --no-install-recommends gcc \
  && apt install -y --no-install-recommends git \
+ && apt install -y --no-install-recommends gnupg \
  && apt install -y --no-install-recommends iproute2 \
+ && apt install -y --no-install-recommends iputils-ping \
  && apt install -y --no-install-recommends less \
  && apt install -y --no-install-recommends libbz2-dev \
  && apt install -y --no-install-recommends libpq-dev \
@@ -44,6 +47,7 @@ RUN apt update \
  && mkdir ~/.aws \
  && cp /tmp/config ~/.aws/config \
  && cp /tmp/credentials ~/.aws/credentials \
+ && pip install fluent-logger \
  && pip install psycopg2 \
  && curl -L "https://github.com/tomnomnom/gron/releases/download/v0.6.1/gron-linux-amd64-0.6.1.tgz" -o "gron-linux-amd64-0.6.1.tgz" \
  && tar xzf gron-linux-amd64-0.6.1.tgz \
@@ -52,6 +56,9 @@ RUN apt update \
  && apt install -y --no-install-recommends postgresql-10 \
  && echo "listen_addresses = '*'" >> /etc/postgresql/10/main/postgresql.conf \
  && echo "host all all 0.0.0.0/0 trust" >> /etc/postgresql/10/main/pg_hba.conf \
+ && curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sh \
+ && mv /etc/td-agent/td-agent.conf /etc/td-agent/td-agent.conf.bk \
+ && mv /tmp/td-agent.conf /etc/td-agent/ \
  && rm -rf /var/lib/apt/lists/* \
  && chmod u+x /usr/local/bin/init.sh
 

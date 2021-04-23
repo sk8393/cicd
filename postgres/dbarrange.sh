@@ -1,4 +1,3 @@
-#!/bin/bash
 sed -i".bk" -e "s/peer/trust/g" /etc/postgresql/10/main/pg_hba.conf
 
 /etc/init.d/postgresql start
