@@ -8,10 +8,11 @@ psql -U postgres -d ${DB_NAME} -c "REVOKE CONNECT ON DATABASE ${DB_NAME} FROM PU
 psql -U postgres -d ${DB_NAME} -c "REVOKE ALL ON SCHEMA public FROM PUBLIC;"
 psql -U postgres -d ${DB_NAME} -c "CREATE SCHEMA ${DB_ROOT_SCHEMA};"
 
-psql -U postgres -d ${DB_NAME} -c \
+psql -U postgres -d ${DB_NAME} -c                                \
 "CREATE TABLE ${DB_ROOT_SCHEMA}.ec2_describe_instances_instances \
-(_id VARCHAR(64) PRIMARY KEY, \
-_timestamp INTEGER);"
+ (_id        VARCHAR(64),                                        \
+  _timestamp INTEGER,                                            \
+  PRIMARY KEY(_id, _timestamp));"
 
 psql -U postgres -d ${DB_NAME} -c \
 "INSERT INTO ${DB_ROOT_SCHEMA}.ec2_describe_instances_instances VALUES ('i-xxxxxxxxxxxxxxxxx', 1618977323);"
