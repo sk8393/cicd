@@ -35,20 +35,6 @@ pipeline {
 						sh "cd ${REPOSITORY}/jenkins/;sysctl -w vm.max_map_count=262144;docker-compose -p test up -d"
 					}
 				}
-
-				stage("clean up docker compose project?") {
-					steps{
-						timeout(time: 1, unit: "HOURS") {
-							input "Would you like to clean up docker compose project?"
-						}
-					}
-				}
-				stage("clean up docker compose project") {
-					steps {
-						sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test down"
-					}
-				}
-
 				stage("conduct test") {
 					when { expression { env.JOB_NAME == "sample-conduct-test-20210423" } }
 					steps {
@@ -63,6 +49,19 @@ pipeline {
 				}
 			}
 		}
+
+                stage("clean up docker compose project?") {
+                        steps{
+                                timeout(time: 1, unit: "HOURS") {
+                                        input "Would you like to clean up docker compose project?"
+                                }
+                        }
+                }
+                stage("clean up docker compose project") {
+                        steps {
+                                sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test down"
+                        }
+                }
 	}
 
 	post {
