@@ -63,3 +63,5 @@ do
 
   INDEX=$((${INDEX} + 1))
 done
+
+chown -R ${SUDO_UID}:${SUDO_GID} ${JENKINS_IMPORT_BASE_DIRECTORY}
