@@ -42,4 +42,4 @@ services:
     deploy:
       replicas: 1
     volumes:
-      - ../.aws:/root/.aws
+      - /home/ubuntu/cicd/.aws:/root/.aws
