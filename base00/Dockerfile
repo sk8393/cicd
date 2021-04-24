@@ -4,8 +4,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 COPY base00/init.sh /usr/local/bin/init.sh
 COPY base00/td-agent.conf /tmp/td-agent.conf
-COPY .aws/config /tmp/config
-COPY .aws/credentials /tmp/credentials
 COPY .ssh/id_rsa /tmp/id_rsa
 COPY .ssh/id_rsa.pub /tmp/id_rsa.pub
 
@@ -45,8 +43,6 @@ RUN apt update \
  && ./aws/install \
  && rm awscliv2.zip \
  && mkdir ~/.aws \
- && cp /tmp/config ~/.aws/config \
- && cp /tmp/credentials ~/.aws/credentials \
  && pip install fluent-logger \
  && pip install psycopg2 \
  && curl -L "https://github.com/tomnomnom/gron/releases/download/v0.6.1/gron-linux-amd64-0.6.1.tgz" -o "gron-linux-amd64-0.6.1.tgz" \

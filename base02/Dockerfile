@@ -1,4 +1,4 @@
-FROM sk8393/base01:2.0
+FROM sk8393/base01:test
 
 # Environmental variables related to database.
 # ENV DB_ENGINE mysql
