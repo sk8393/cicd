@@ -15,3 +15,5 @@ sudo docker ps -a | grep jenkins | cut -d " " -f1 | xargs sudo docker logs
 # Inbound rule of security group has to be opene for all traffic.
 cd jenkins;./create_import.sh.sh
 cd jenkins;./import.sh
+
+# Check volumes defined in jenkins/docker-compose.yml is OK.
