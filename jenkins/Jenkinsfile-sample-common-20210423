@@ -23,8 +23,7 @@ pipeline {
 				stage("build image") {
 					when { expression { env.JOB_NAME == "sample-build-docker-image-20210423" } }
 					steps {
-						sh "cd ${REPOSITORY};docker build -t sk8393/postgres:test -f postgres/Dockerfile ."
-						sh "cd ${REPOSITORY};docker build -t sk8393/requester:test -f requester/Dockerfile ."
+						sh "cd ${REPOSITORY};chmod 774 create_docker_image_for_test.sh;./create_docker_image_for_test.sh"
 					}
 				}
 				stage("create docker compose project") {
