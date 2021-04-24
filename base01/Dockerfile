@@ -1,1 +1,1 @@
-FROM sk8393/base00:2.0
+FROM sk8393/base00:test

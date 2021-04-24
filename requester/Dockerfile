@@ -1,4 +1,4 @@
-FROM sk8393/base02:2.0
+FROM sk8393/base02:test
 
 COPY requester/requester.py /root/
 
