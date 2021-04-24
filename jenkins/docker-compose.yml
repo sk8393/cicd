@@ -41,3 +41,5 @@ services:
     container_name: requester
     deploy:
       replicas: 1
+    volumes:
+      - ../.aws:/root/.aws
