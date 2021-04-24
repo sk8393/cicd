@@ -3,3 +3,5 @@
 
 # nano is the default editor on Ubuntu that I am not familiar with.
 git config --global core.editor vim
+
+# Create .aws/credentials with AWS access key.
