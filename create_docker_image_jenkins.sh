@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t sk8393/jenkins:2.0 -f jenkins/Dockerfile .
+docker build -t sk8393/jenkins:production -f jenkins/Dockerfile .

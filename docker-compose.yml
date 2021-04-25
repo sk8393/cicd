@@ -1,7 +1,7 @@
 version: '3'
 services:
   gitbucket:
-    image: sk8393/gitbucket:2.0
+    image: sk8393/gitbucket:production
     container_name: gitbucket
     deploy:
       replicas: 1
@@ -12,7 +12,7 @@ services:
       - ./gitbucket/container-volume:/gitbucket
 
   jenkins:
-    image: sk8393/jenkins:2.0
+    image: sk8393/jenkins:production
     container_name: jenkins
     deploy:
       replicas: 1
