@@ -43,3 +43,11 @@ services:
       replicas: 1
     volumes:
       - /home/ubuntu/cicd/.aws:/root/.aws
+
+  tester:
+    image: 'sk8393/tester:test'
+    container_name: tester
+    deploy:
+      replicas: 1
+    ports:
+      - "22222:22"

@@ -35,7 +35,9 @@ pipeline {
 				stage("conduct test") {
 					when { expression { env.JOB_NAME == "sample-conduct-test-20210423" } }
 					steps {
+						sleep 30
 						sh "cd ${REPOSITORY}/jenkins/;chmod 774 test.sh;./test.sh"
+						sh "ssh -i ~/.ssh/id_rsa -oStrictHostKeyChecking=no -p 22222 -q root@tester.sk8393.pw './test.sh'"
 					}
 				}
 				stage("tag for production") {

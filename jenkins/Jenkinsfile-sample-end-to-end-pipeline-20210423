@@ -39,14 +39,15 @@ pipeline {
 		stage("clean up docker compose project?") {
 			steps{
 				timeout(time: 1, unit: "HOURS") {
-					input "Would you like to clean up docker compose project?"
+					input "Are you ready to clean up docker compose project?"
 				}
 			}
 		}
-		stage("clean up docker compose project") {
-			steps {
-				sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test down"
-			}
+	}
+
+	post {
+		always {
+			sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test down"
 		}
 	}
 }

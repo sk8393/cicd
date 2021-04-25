@@ -14,6 +14,7 @@ RUN apt update \
  && apt install -y --no-install-recommends gnupg \
  && apt install -y --no-install-recommends iproute2 \
  && apt install -y --no-install-recommends iputils-ping \
+ && apt install -y --no-install-recommends language-pack-en \
  && apt install -y --no-install-recommends less \
  && apt install -y --no-install-recommends libbz2-dev \
  && apt install -y --no-install-recommends libpq-dev \
@@ -55,6 +56,8 @@ RUN apt update \
  && curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sh \
  && mv /etc/td-agent/td-agent.conf /etc/td-agent/td-agent.conf.bk \
  && mv /tmp/td-agent.conf /etc/td-agent/ \
+ && curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/local/bin/jq \
+ && chmod +x /usr/local/bin/jq \
  && rm -rf /var/lib/apt/lists/* \
  && chmod u+x /usr/local/bin/init.sh
 
