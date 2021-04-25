@@ -49,3 +49,5 @@ services:
     container_name: tester
     deploy:
       replicas: 1
+    ports:
+      - "22222:22"
