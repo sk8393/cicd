@@ -14,6 +14,7 @@ RUN apt update \
  && apt install -y --no-install-recommends gnupg \
  && apt install -y --no-install-recommends iproute2 \
  && apt install -y --no-install-recommends iputils-ping \
+ && apt install -y --no-install-recommends language-pack-en \
  && apt install -y --no-install-recommends less \
  && apt install -y --no-install-recommends libbz2-dev \
  && apt install -y --no-install-recommends libpq-dev \
