@@ -19,7 +19,7 @@
 	stages {
 		stage(&quot;call tester through ssh&quot;) {
 			steps {
-				sh &quot;ssh -i ~/.ssh/id_rsa -oStrictHostKeyChecking=no -p 22222 root@cicd.sk8393.pw &apos;uname -a&apos;&quot;
+				sh &quot;ssh -i ~/.ssh/id_rsa -oStrictHostKeyChecking=no -p 22222 root@tester.sk8393.pw &apos;uname -a&apos;&quot;
 			}
 		}
 	}
