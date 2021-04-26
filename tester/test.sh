@@ -23,7 +23,7 @@ do
     eval "${CONFIRM_INDEX_COMMAND}${RETRIEVE_LENGTH_OF_ARRAY}"
   fi
 
-  if [ ${COUNT} -eq 3 ]; then
+  if [ ${COUNT} -eq 12 ]; then
     exit 1
   fi
 
