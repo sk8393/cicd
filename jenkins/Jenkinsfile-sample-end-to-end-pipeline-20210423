@@ -47,6 +47,8 @@ pipeline {
 
 	post {
 		always {
+			cleanWs()
+			sh "git clone -b test https://github.com/sk8393/cicd.git"
 			sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test down"
 		}
 	}
