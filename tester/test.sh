@@ -1,4 +1,16 @@
 #!/bin/bash
+# Check record is inserted in PostgreSQL.
+CONFIRM_RECORD_COMMAND='psql -h postgres -U root -d awssql -t -A -c "SELECT * FROM root.ec2_describe_instances_instances ORDER BY _timestamp DESC LIMIT 1;"'
+NUMBER_OF_RECORD=`eval "${CONFIRM_RECORD_COMMAND} | wc -l"`
+if [ ${NUMBER_OF_RECORD} -ne 1 ]; then
+  echo "\$ ${CONFIRM_RECORD_COMMAND} | wc -l"
+  eval "${CONFIRM_RECORD_COMMAND} | wc -l"
+  exit 1
+else
+  echo "\$ ${CONFIRM_RECORD_COMMAND}"
+  eval "${CONFIRM_RECORD_COMMAND}"
+fi
+
 # Confirm status of Elasticsearch cluster.
 CONFIRM_CLUSTER_COMMAND='curl -s -X GET "elasticsearch:9200/_cat/health?format=json&pretty"'
 # CONFIRM_CLUSTER_COMMAND='curl -s -X GET "elasticsearch:9200/_cat/health?v"'
