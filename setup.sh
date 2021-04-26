@@ -4,14 +4,14 @@ then
   source ./variables.sh
 fi
 
-if [[ `whoami` != "root" ]]
+if [[ `whoami` = "root" ]]
 then
-  echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "EXIT"): "Need to be root user to use docker command.""
+  echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "EXIT"): "Need to be non root user to avoid error in git command.""
   exit 1
 fi
 
 if [ ! -f ./.aws/credentials ]; then
-  echo "Create .aws/credentials with AWS access key."
+  echo "$(printf "%${MAX_VARIABLE_LENGTH}s" "EXIT"): "Create .aws/credentials with AWS access key.""
   exit 1
 fi
 
