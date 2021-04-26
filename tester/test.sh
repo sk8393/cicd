@@ -27,7 +27,7 @@ do
     exit 1
   fi
 
-  sleep 1
+  sleep 10
 
   (( COUNT++ ))
 done
