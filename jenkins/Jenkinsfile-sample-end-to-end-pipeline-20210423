@@ -32,7 +32,7 @@ pipeline {
 		always {
 			cleanWs()
 			sh "git clone -b test https://github.com/sk8393/cicd.git"
-			timeout(time: 1, unit: "HOURS") {
+			timeout(time: 2, unit: "HOURS") {
 				input "Are you ready to clean up docker compose project?"
 			}
 			sh "cd ${REPOSITORY}/jenkins/;docker-compose -p test down"
