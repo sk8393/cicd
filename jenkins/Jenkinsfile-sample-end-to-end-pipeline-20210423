@@ -26,23 +26,6 @@ pipeline {
 				build "sample-tag-for-production-20210423"
 			}
 		}
-		stage("clean workspace") {
-			steps {
-				cleanWs()
-			}
-		}
-		stage("git clone") {
-			steps {
-				sh "git clone -b test https://github.com/sk8393/cicd.git"
-			}
-		}
-		stage("clean up docker compose project?") {
-			steps{
-				timeout(time: 1, unit: "HOURS") {
-					input "Are you ready to clean up docker compose project?"
-				}
-			}
-		}
 	}
 
 	post {

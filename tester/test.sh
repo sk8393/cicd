@@ -4,8 +4,6 @@ CONFIRM_CLUSTER_COMMAND='curl -s -X GET "elasticsearch:9200/_cat/health?format=j
 echo "\$ ${CONFIRM_CLUSTER_COMMAND}"
 eval ${CONFIRM_CLUSTER_COMMAND}
 
-exit 1
-
 CONFIRM_INDEX_COMMAND='curl -s -X GET "elasticsearch:9200/_cat/indices/awssql*?format=json&pretty"'
 # CONFIRM_INDEX_COMMAND='curl -s -X GET "elasticsearch:9200/_cat/indices/awssql*?v"'
 echo "\$ ${CONFIRM_INDEX_COMMAND}"
