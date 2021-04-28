@@ -51,3 +51,15 @@ services:
       replicas: 1
     ports:
       - "22222:22"
+    volumes:
+      - /home/ubuntu/cicd/.aws:/root/.aws
+
+  cloud9:
+    image: 'sk8393/cloud9:test'
+    container_name: cloud9
+    deploy:
+      replicas: 1
+    ports:
+      - "8080:8080"
+    volumes:
+      - /home/ubuntu/cicd/.aws:/root/.aws

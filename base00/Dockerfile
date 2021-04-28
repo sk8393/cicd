@@ -62,6 +62,15 @@ RUN apt install -y --no-install-recommends nodejs
 RUN apt install -y --no-install-recommends npm
 RUN git clone https://github.com/c9/core.git cloud9 \
  && cd cloud9;./scripts/install-sdk.sh
+RUN rm /usr/bin/python \
+ && rm /usr/bin/python3 \
+ && ln -s /usr/bin/python3.8 /usr/bin/python3 \
+ && ln -s /usr/bin/python3 /usr/bin/python \
+ && rm /usr/bin/pip \
+ && ln -s /usr/bin/pip3 /usr/bin/pip
+RUN pip install boto3
+RUN pip install fluent-logger
+RUN pip install psycopg2-binary
 RUN rm -rf /var/lib/apt/lists/*
 RUN chmod u+x /usr/local/bin/init.sh
 
