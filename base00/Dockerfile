@@ -22,6 +22,8 @@ RUN apt install -y --no-install-recommends libreadline-dev
 RUN apt install -y --no-install-recommends libsqlite3-dev
 RUN apt install -y --no-install-recommends libssl-dev
 RUN apt install -y --no-install-recommends make
+RUN apt install -y --no-install-recommends nodejs
+RUN apt install -y --no-install-recommends npm
 RUN apt install -y --no-install-recommends openssh-server \
  && mkdir ~/.ssh \
  && cp /tmp/id_rsa ~/.ssh/id_rsa \
