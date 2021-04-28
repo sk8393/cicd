@@ -22,8 +22,6 @@ RUN apt update \
  && apt install -y --no-install-recommends libsqlite3-dev \
  && apt install -y --no-install-recommends libssl-dev \
  && apt install -y --no-install-recommends make \
- && apt install -y --no-install-recommends nodejs \
- && apt install -y --no-install-recommends npm \
  && apt install -y --no-install-recommends openssh-server \
  && mkdir ~/.ssh \
  && cp /tmp/id_rsa ~/.ssh/id_rsa \
