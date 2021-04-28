@@ -60,6 +60,8 @@ RUN apt update \
  && mv /tmp/td-agent.conf /etc/td-agent/ \
  && curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/local/bin/jq \
  && chmod +x /usr/local/bin/jq \
+ && git clone https://github.com/c9/core.git cloud9 \
+ && cd cloud9;./scripts/install-sdk.sh\
  && rm -rf /var/lib/apt/lists/* \
  && chmod u+x /usr/local/bin/init.sh
 
