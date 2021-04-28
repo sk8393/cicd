@@ -60,6 +60,8 @@ RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -
  && chmod +x /usr/local/bin/jq
 RUN apt install -y --no-install-recommends nodejs
 RUN apt install -y --no-install-recommends npm
+RUN git clone https://github.com/c9/core.git cloud9 \
+ && cd cloud9;./scripts/install-sdk.sh
 RUN rm -rf /var/lib/apt/lists/*
 RUN chmod u+x /usr/local/bin/init.sh
 
