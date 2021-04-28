@@ -22,8 +22,6 @@ RUN apt install -y --no-install-recommends libreadline-dev
 RUN apt install -y --no-install-recommends libsqlite3-dev
 RUN apt install -y --no-install-recommends libssl-dev
 RUN apt install -y --no-install-recommends make
-RUN apt install -y --no-install-recommends nodejs
-RUN apt install -y --no-install-recommends npm
 RUN apt install -y --no-install-recommends openssh-server \
  && mkdir ~/.ssh \
  && cp /tmp/id_rsa ~/.ssh/id_rsa \
@@ -60,6 +58,8 @@ RUN curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3
  && mv /tmp/td-agent.conf /etc/td-agent/
 RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/local/bin/jq \
  && chmod +x /usr/local/bin/jq
+RUN apt install -y --no-install-recommends nodejs
+RUN apt install -y --no-install-recommends npm
 RUN rm -rf /var/lib/apt/lists/*
 RUN chmod u+x /usr/local/bin/init.sh
 
