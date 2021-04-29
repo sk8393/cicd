@@ -35,6 +35,13 @@ services:
       replicas: 1
     ports:
       - '5432:5432'
+#   # Mounting volume on Linux host did not work due to permission issue.
+#   # In concrete term, mounted directory was associated with "root" user, and caused following error.
+#   # Error: Config owner (postgres:102) and data owner (root:0) do not match, and config owner is not root
+#   # Following article describes that this problem does not happen if Docker is running on top of Mac.
+#   # https://qiita.com/yohm/items/047b2e68d008ebb0f001
+#   volumes:
+#     - ../postgres/container-volume:/var/lib/postgresql/10/main
 
   requester:
     image: 'sk8393/requester:test'
