@@ -63,3 +63,17 @@ services:
       - "8080:8080"
     volumes:
       - /home/ubuntu/cicd/.aws:/root/.aws
+
+  pgadmin4:
+    image: dpage/pgadmin4:4.2
+    container_name: pgadmin
+    ports:
+      - 8000:80
+    volumes:
+      - ../pgadmin/container-volume:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root
+      PGADMIN_DEFAULT_PASSWORD: root
+    depends_on:
+      - postgres
+    restart: always
