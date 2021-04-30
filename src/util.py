@@ -1,4 +1,3 @@
-import datetime
 import io
 import json
 import os
@@ -8,6 +7,7 @@ import sys
 import time
 import traceback
 
+from datetime import date, datetime
 from fluent import sender
 from fluent import event
 
@@ -26,7 +26,7 @@ def show_message(msg, newline=True, show_timestamp=True, _arg_function='', _arg_
     try:
         sys.stdout.write(
             "%s%s%s%s" % (
-                ("%s : " % datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")) if show_timestamp else "",
+                ("%s : " % datetime.now().strftime("%Y-%m-%d %H:%M:%S")) if show_timestamp else "",
                 "[%s]" % HOSTNAME[:4],
                 msg,
                 "\n" if newline else ""))
@@ -39,7 +39,7 @@ def show_message(msg, newline=True, show_timestamp=True, _arg_function='', _arg_
         body_dict['function_exit'] = _arg_function_exit
         body_dict['hostname'] = HOSTNAME
         body_dict['message'] = str(msg)
-        now = datetime.datetime.now()
+        now = datetime.now()
         body_dict['@timestamp'] = now.strftime("%Y-%m-%dT%H:%M:%S.") + "%03d" % (now.microsecond // 1000)
 
         sender.setup(
@@ -127,3 +127,22 @@ class DB:
             else:
                 traceback.print_exc()
                 exit()
+
+def json_serial(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+def dump(_arg_file_name, _arg_object):
+    f = open(_arg_file_name, "w")
+    if isinstance(_arg_object, dict):
+        d = {}
+        for _k, _v in _arg_object.items():
+            if isinstance(_k, tuple):
+                d[str(_k)] = _v
+            else:
+                d[_k] = _v
+        json.dump(d, f, default=json_serial, indent=2)
+    else:
+        json.dump(_arg_object, f, default=json_serial, indent=2)
+    f.close()

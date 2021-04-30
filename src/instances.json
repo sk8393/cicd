@@ -1,0 +1,147 @@
+{
+  "('737936301346', 'ap-northeast-1', 'ec2', 0)": [
+    {
+      "AmiLaunchIndex": 0,
+      "ImageId": "ami-0dddfb98d1c254558",
+      "InstanceId": "i-02d2507f7c7d975b0",
+      "InstanceType": "t2.medium",
+      "KeyName": "id_rsa.pub",
+      "LaunchTime": "2021-04-30T00:58:59+00:00",
+      "Monitoring": {
+        "State": "disabled"
+      },
+      "Placement": {
+        "AvailabilityZone": "ap-northeast-1a",
+        "GroupName": "",
+        "Tenancy": "default"
+      },
+      "PrivateDnsName": "ip-172-31-10-198.ap-northeast-1.compute.internal",
+      "PrivateIpAddress": "172.31.10.198",
+      "ProductCodes": [
+        {
+          "ProductCodeId": "4f32ts56dbeqbfra3i4nn7emk",
+          "ProductCodeType": "marketplace"
+        }
+      ],
+      "PublicDnsName": "ec2-54-178-43-212.ap-northeast-1.compute.amazonaws.com",
+      "PublicIpAddress": "54.178.43.212",
+      "State": {
+        "Code": 16,
+        "Name": "running"
+      },
+      "StateTransitionReason": "",
+      "SubnetId": "subnet-5341461a",
+      "VpcId": "vpc-3ca77d59",
+      "Architecture": "x86_64",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "AttachTime": "2021-04-28T21:30:10+00:00",
+            "DeleteOnTermination": true,
+            "Status": "attached",
+            "VolumeId": "vol-05ce275fba8105726"
+          }
+        }
+      ],
+      "ClientToken": "161964540616881456",
+      "EbsOptimized": false,
+      "EnaSupport": true,
+      "Hypervisor": "xen",
+      "IamInstanceProfile": {
+        "Arn": "arn:aws:iam::737936301346:instance-profile/sk8393-iam-ec2-admin",
+        "Id": "AIPAJ5QISKG6RZPTESF3C"
+      },
+      "NetworkInterfaces": [
+        {
+          "Association": {
+            "IpOwnerId": "amazon",
+            "PublicDnsName": "ec2-54-178-43-212.ap-northeast-1.compute.amazonaws.com",
+            "PublicIp": "54.178.43.212"
+          },
+          "Attachment": {
+            "AttachTime": "2021-04-28T21:30:09+00:00",
+            "AttachmentId": "eni-attach-08bf806ad681f0494",
+            "DeleteOnTermination": true,
+            "DeviceIndex": 0,
+            "Status": "attached",
+            "NetworkCardIndex": 0
+          },
+          "Description": "Primary network interface",
+          "Groups": [
+            {
+              "GroupName": "sk8393-sg-172.31.0.0.16-step",
+              "GroupId": "sg-8353c2fb"
+            },
+            {
+              "GroupName": "sk8393-sg-172.31.0.0.16-webhook-github",
+              "GroupId": "sg-0bbb39d5271375be4"
+            }
+          ],
+          "Ipv6Addresses": [],
+          "MacAddress": "06:4d:a7:a0:1d:d1",
+          "NetworkInterfaceId": "eni-072f27f78c8b92d11",
+          "OwnerId": "737936301346",
+          "PrivateDnsName": "ip-172-31-10-198.ap-northeast-1.compute.internal",
+          "PrivateIpAddress": "172.31.10.198",
+          "PrivateIpAddresses": [
+            {
+              "Association": {
+                "IpOwnerId": "amazon",
+                "PublicDnsName": "ec2-54-178-43-212.ap-northeast-1.compute.amazonaws.com",
+                "PublicIp": "54.178.43.212"
+              },
+              "Primary": true,
+              "PrivateDnsName": "ip-172-31-10-198.ap-northeast-1.compute.internal",
+              "PrivateIpAddress": "172.31.10.198"
+            }
+          ],
+          "SourceDestCheck": true,
+          "Status": "in-use",
+          "SubnetId": "subnet-5341461a",
+          "VpcId": "vpc-3ca77d59",
+          "InterfaceType": "interface"
+        }
+      ],
+      "RootDeviceName": "/dev/sda1",
+      "RootDeviceType": "ebs",
+      "SecurityGroups": [
+        {
+          "GroupName": "sk8393-sg-172.31.0.0.16-step",
+          "GroupId": "sg-8353c2fb"
+        },
+        {
+          "GroupName": "sk8393-sg-172.31.0.0.16-webhook-github",
+          "GroupId": "sg-0bbb39d5271375be4"
+        }
+      ],
+      "SourceDestCheck": true,
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "sk8393-ec2-compose"
+        }
+      ],
+      "VirtualizationType": "hvm",
+      "CpuOptions": {
+        "CoreCount": 2,
+        "ThreadsPerCore": 1
+      },
+      "CapacityReservationSpecification": {
+        "CapacityReservationPreference": "open"
+      },
+      "HibernationOptions": {
+        "Configured": false
+      },
+      "MetadataOptions": {
+        "State": "applied",
+        "HttpTokens": "optional",
+        "HttpPutResponseHopLimit": 1,
+        "HttpEndpoint": "enabled"
+      },
+      "EnclaveOptions": {
+        "Enabled": false
+      }
+    }
+  ]
+}
