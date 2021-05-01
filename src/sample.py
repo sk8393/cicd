@@ -22,23 +22,27 @@ def preliminary_task():
 
 def call_endpoint(_arg_apis_list):
     d = {}
-    for _index, _api in enumerate(_arg_apis_list):
-        # client = boto3.client(_api[3], aws_access_key_id=_api[0], aws_secret_access_key=_api[1], region_name=_api[2])
-        client = boto3.client(_api[2], region_name=_api[1])
+    # e.g. _arg_apis_list=[("737936301346", "ap-northeast-1", "ec2")]
+    # e.g. _i_api=("737936301346", "ap-northeast-1", "ec2")
+    # e.g. _index=0
+    for _index, _i_api in enumerate(_arg_apis_list):
+        # client = boto3.client(_i_api[3], aws_access_key_id=_i_api[0], aws_secret_access_key=_i_api[1], region_name=_i_api[2])
+        client = boto3.client(_i_api[2], region_name=_i_api[1])
         responce = client.describe_instances()
-        new_key = _api + (_index, )
+        # Need consideration of pagination, _index of following implementation do nothing.
+        new_key = _i_api + (_index, )
         d[new_key] = responce
     return d
 
 def extract_instances(_arg_responce):
-    d = {}
-    for _k, _v in _arg_responce.items():
+    instances_dict = {}
+    for _k_meta, _v_reservations in _arg_responce.items():
         instance_list = []
-        for reservation in _v['Reservations']:
+        for reservation in _v_reservations['Reservations']:
             for instance in reservation['Instances']:
                 instance_list.append(instance)
-        d[_k] = instance_list
-    return d
+        instances_dict[_k_meta] = instance_list
+    return instances_dict
 
 def avoid_key_name(_arg_column_name):
     if _arg_column_name.lower() == "primary":
@@ -63,53 +67,65 @@ def dig_dict(target_dict, target_branch, sep):
         leaf = leaf[one_limb]
     return leaf
 
-def flatten_core(_arg_instance_dict, _arg_table_name, _arg_id, _arg_timestamp, _arg_index, _arg_join_key, _arg_k):
-    for _column_name in list(get_dict_hierarchy(_arg_instance_dict, '', '_')):
-        if isinstance(dig_dict(_arg_instance_dict, _column_name, '_'), list):
+def set_value_to_pseudo_table_dict(_arg_meta_key, _arg_table_name, _arg_index, _arg_column_name, _arg_column_value, _arg_id, _arg_timestamp, _arg_join_key, _arg_instance_count):
+    try:
+        pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)]
+    except KeyError:
+        pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)] = {}
+
+    tmp = pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)]
+    tmp[_arg_column_name] = _arg_column_value
+    tmp["_id"] = _arg_id
+    tmp["_timestamp"] = _arg_timestamp
+    tmp["_index"] = _arg_index
+    tmp["_join_key"] = _arg_join_key
+    pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)] = tmp
+
+def flatten_core(_arg_instance_dict, _arg_table_name, _arg_id, _arg_timestamp, _arg_index, _arg_join_key, _arg_meta_key, _arg_instance_count):
+    for _i_column_name in list(get_dict_hierarchy(_arg_instance_dict, '', '_')):
+        # "Placement":{"AvailabilityZone":"ap-northeast-1c"}
+        # sets _i_column_name="Placement_AvailabilityZone" and column_value="ap-northeast-1c"
+        # "NetworkInterfaces":[{"Description":"Primary network interface"}]
+        # sets _i_column_name="NetworkInterfaces" and column_value is a list.
+        column_value = dig_dict(_arg_instance_dict, _i_column_name, '_')
+        column_name = _i_column_name.lower()
+        table_name = _arg_table_name.lower()
+
+        if isinstance(column_value, list):
             _join_key = str(uuid.uuid4())
-            for _index_sub, _dict_sub in enumerate(dig_dict(_arg_instance_dict, _column_name, '_')):
-                tmp_pseudo_table_dict = {_arg_k+(_arg_table_name.lower(), _arg_index): {_column_name.lower(): _join_key}}
+            # "SecurityGroups":[{"GroupName":"sk8393-sg-172.31.0.0.16-step"},{"GroupName":"sk8393-sg-172.31.0.0.16-webhook-github"}]
+            # will be broken down as below:
+            # {"GroupName":"sk8393-sg-172.31.0.0.16-step"}           - _index_of_array=0
+            # {"GroupName":"sk8393-sg-172.31.0.0.16-webhook-github"} - _index_of_array=1
+            for _index_of_array, _i_instance_partial_dict in enumerate(column_value):
+                set_value_to_pseudo_table_dict(_arg_meta_key, table_name, _arg_index, column_name, _join_key, _arg_id, _arg_timestamp, _arg_join_key, _arg_instance_count)
 
-                try:
-                    pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)]
-                except KeyError:
-                    pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)] = {}
-
-                tmp = pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)]
-                tmp[_column_name.lower()] = _join_key
-                tmp["_id"] = _arg_id
-                tmp["_timestamp"] = _arg_timestamp
-                tmp["_index"] = _arg_index
-                tmp["_join_key"] = _arg_join_key
-                pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)] = tmp
-
-                flatten_core(_dict_sub, _arg_table_name + "_" + _column_name, _arg_id, _arg_timestamp, _index_sub, _join_key, _arg_k)
+                flatten_core(_i_instance_partial_dict, _arg_table_name + "_" + _i_column_name, _arg_id, _arg_timestamp, _index_of_array, _join_key, _arg_meta_key, _arg_instance_count)
         else:
-            tmp_pseudo_table_dict = {_arg_k+(_arg_table_name.lower(), _arg_index): {_column_name.lower(): (dig_dict(_arg_instance_dict, _column_name, '_'))}}
-
-            try:
-                pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)]
-            except KeyError:
-                pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)] = {}
-
-            tmp = pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)]
-            tmp[_column_name.lower()] = (dig_dict(_arg_instance_dict, _column_name, '_'))
-            tmp["_id"] = _arg_id
-            tmp["_timestamp"] = _arg_timestamp
-            tmp["_index"] = _arg_index
-            tmp["_join_key"] = _arg_join_key
-            pseudo_table_dict[_arg_k+(_arg_table_name.lower(), _arg_index)] = tmp
+            set_value_to_pseudo_table_dict(_arg_meta_key, table_name, _arg_index, column_name, column_value, _arg_id, _arg_timestamp, _arg_join_key, _arg_instance_count)
 
 def flatten(_arg_instances):
-    for _k, _v in _arg_instances.items():
-        account_id = [0]
-        region = _k[1]
-        service = _k[2]
-        for instance in _v:
-            _id = instance["InstanceId"]
+    for _k_meta, _v_instance_list in _arg_instances.items():
+        account_id = _k_meta[0]
+        region = _k_meta[1]
+        service = _k_meta[2]
+        # key value pair of "_arg_instances" is created per json response from API endpoint.
+        # If there were 100+/1000+ instances and pagination happens, is has to be stored with different key in "_arg_instances".
+        dummy_index = _k_meta[3]
+        for _index_instance_count, _i_instance in enumerate(_v_instance_list):
+            _id = _i_instance["InstanceId"]
+            table_name = "describe_instances"
             _index = None
             _join_key = None
-            flatten_core(instance, "describe_instances", _id, _timestamp, _index, _join_key, _k)
+            flatten_core(
+                _i_instance,
+                table_name,
+                _id,
+                _timestamp,
+                _index,
+                _join_key,
+                _k_meta,
+                _index_instance_count)
     return {}
 
 def insert():
