@@ -24,10 +24,10 @@
             "ProductCodes": [],
             "PublicDnsName": "",
             "State": {
-              "Code": 16,
-              "Name": "running"
+              "Code": 80,
+              "Name": "stopped"
             },
-            "StateTransitionReason": "",
+            "StateTransitionReason": "User initiated (2021-05-01 12:09:24 GMT)",
             "SubnetId": "subnet-355e2f6e",
             "VpcId": "vpc-3ca77d59",
             "Architecture": "x86_64",
@@ -92,6 +92,10 @@
               }
             ],
             "SourceDestCheck": true,
+            "StateReason": {
+              "Code": "Client.UserInitiatedShutdown",
+              "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+            },
             "Tags": [
               {
                 "Key": "Name",
@@ -275,16 +279,16 @@
       }
     ],
     "ResponseMetadata": {
-      "RequestId": "912453e9-a872-400b-a4da-4728aec66af8",
+      "RequestId": "420dea14-adfc-4ee7-ba12-3a0ff7c73f0e",
       "HTTPStatusCode": 200,
       "HTTPHeaders": {
-        "x-amzn-requestid": "912453e9-a872-400b-a4da-4728aec66af8",
+        "x-amzn-requestid": "420dea14-adfc-4ee7-ba12-3a0ff7c73f0e",
         "cache-control": "no-cache, no-store",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "content-type": "text/xml;charset=UTF-8",
         "transfer-encoding": "chunked",
         "vary": "accept-encoding",
-        "date": "Sat, 01 May 2021 12:05:36 GMT",
+        "date": "Sat, 01 May 2021 13:13:55 GMT",
         "server": "AmazonEC2"
       },
       "RetryAttempts": 0

@@ -127,11 +127,20 @@ class DB:
             else:
                 traceback.print_exc()
                 exit()
+        except psycopg2.errors.UndefinedColumn as e:
+            exception_message_list = list()
+            for _x in e.args:
+                exception_message_list.append(str(_x))
+            exception_messages = ','.join(exception_message_list)
+            print(exception_messages)
+            exit()
+
 
 def json_serial(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
+
 
 def dump(_arg_file_name, _arg_object):
     f = open(_arg_file_name, "w")

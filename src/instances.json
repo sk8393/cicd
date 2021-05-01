@@ -20,10 +20,10 @@
       "ProductCodes": [],
       "PublicDnsName": "",
       "State": {
-        "Code": 16,
-        "Name": "running"
+        "Code": 80,
+        "Name": "stopped"
       },
-      "StateTransitionReason": "",
+      "StateTransitionReason": "User initiated (2021-05-01 12:09:24 GMT)",
       "SubnetId": "subnet-355e2f6e",
       "VpcId": "vpc-3ca77d59",
       "Architecture": "x86_64",
@@ -88,6 +88,10 @@
         }
       ],
       "SourceDestCheck": true,
+      "StateReason": {
+        "Code": "Client.UserInitiatedShutdown",
+        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+      },
       "Tags": [
         {
           "Key": "Name",
