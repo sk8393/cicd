@@ -22,7 +22,7 @@ HOSTNAME = os.environ['HOSTNAME']
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-def show_message(msg, newline=True, show_timestamp=True, _arg_function='', _arg_function_enter=0, _arg_function_exit=0, _arg_callback_id=''):
+def show_message(msg, newline=True, show_timestamp=True):
     try:
         sys.stdout.write(
             "%s%s%s%s" % (
@@ -33,10 +33,6 @@ def show_message(msg, newline=True, show_timestamp=True, _arg_function='', _arg_
         sys.stdout.flush()
 
         body_dict = dict()
-        body_dict['callback_id'] = _arg_callback_id
-        body_dict['function'] = _arg_function
-        body_dict['function_enter'] = _arg_function_enter
-        body_dict['function_exit'] = _arg_function_exit
         body_dict['hostname'] = HOSTNAME
         body_dict['message'] = str(msg)
         now = datetime.now()
@@ -115,6 +111,7 @@ class DB:
             self.cursor.execute(
                     _arg_sql_insert_statement,
                     _arg_insert_value_list)
+            self.connection.commit()
         except psycopg2.IntegrityError as e:
             exception_message_list = list()
             for _x in e.args:
@@ -128,6 +125,32 @@ class DB:
                 traceback.print_exc()
                 exit()
         except psycopg2.errors.UndefinedColumn as e:
+            exception_message_list = list()
+            for _x in e.args:
+                exception_message_list.append(str(_x))
+            exception_messages = ','.join(exception_message_list)
+            print(exception_messages)
+            column_does_not_exist = re.search(r"column \"(\w*?)\" of relation \"(\w*?)\" does not exist", exception_messages)
+            if column_does_not_exist:
+                self.connection.commit()
+                column = column_does_not_exist.group(1)
+                table = column_does_not_exist.group(2)
+                self.add_column(table, column)
+                self.insert(_arg_sql_insert_statement, _arg_insert_value_list)
+            else:
+                exit()
+
+    def add_column(self, _arg_table, _arg_column):
+        try:
+            add_column_statement = """
+                ALTER TABLE {0}.{1} ADD COLUMN {2} {3};""".format(
+                    "root",
+                    _arg_table,
+                    _arg_column,
+                    "VARCHAR(64)")
+            self.cursor.execute(add_column_statement)
+            self.connection.commit()
+        except psycopg2.ProgrammingError as e:
             exception_message_list = list()
             for _x in e.args:
                 exception_message_list.append(str(_x))
