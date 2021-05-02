@@ -18,6 +18,7 @@ VARCHAR_LENGTH = '64'
 def preliminary_task():
     # apis_list = [("********************", "****************************************", "ap-northeast-1", "ec2")]
     apis_list = [("737936301346", "ap-northeast-1", "ec2")]
+    show_message("apis_list=%s" % (apis_list))
     return apis_list
 
 def call_endpoint(_arg_apis_list):
@@ -32,6 +33,7 @@ def call_endpoint(_arg_apis_list):
         # Need consideration of pagination, _index of following implementation do nothing.
         new_key = _i_api + (_index, )
         d[new_key] = responce
+    show_message("d=%s" % (d))
     return d
 
 def extract_instances(_arg_responce):
@@ -42,6 +44,7 @@ def extract_instances(_arg_responce):
             for instance in reservation['Instances']:
                 instance_list.append(instance)
         instances_dict[_k_meta] = instance_list
+    show_message("instances_dict=%s" % (instances_dict))
     return instances_dict
 
 def avoid_key_name(_arg_column_name):
@@ -139,12 +142,11 @@ def insert():
         tmp_create_statement_list = list(map(lambda x : x + " VARCHAR(" + VARCHAR_LENGTH + ")", column_name_list))
         # print(tmp_create_statement_list)
 
-        create_table = """
-                CREATE TABLE {0}.{1}({2}, PRIMARY KEY(_id, _timestamp, _index, _join_key));""".format(
-                        'root',
-                        table_name,
-                        ','.join(tmp_create_statement_list))
-        # print(create_table)
+        create_table = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_id, _timestamp, _index, _join_key));".format(
+            'root',
+            table_name,
+            ','.join(tmp_create_statement_list)
+        )
 
         db.create(create_table)
         db.connection.commit()
@@ -154,7 +156,6 @@ def insert():
         value_list = list()
 
         id = None
-        print(_v)
         for k, v in _v.items():
             if len(k) <= 63:
                 if k.lower()== 'primary' or k=='DEFAULT' or k=='END':
@@ -174,17 +175,17 @@ def insert():
                 show_message(e.args)
                 value_list.append('?')
 
-        tmp_insert_table = """
-                INSERT INTO {0}.{1} ({2}) VALUES(%s""".format(
-                        'root',
-                        table_name,
-                        ','.join(list(map(lambda x : x.lower(), column_name_list))))
+        tmp_insert_table = "INSERT INTO {0}.{1} ({2}) VALUES(%s".format(
+            'root',
+            table_name,
+            ','.join(list(map(lambda x : x.lower(), column_name_list)))
+        )
+
         count = 1
         for _x in range(1, len(column_name_list)):
             tmp_insert_table += ', %s'
             count += 1
         insert_table = tmp_insert_table + ');'
-        print(insert_table)
 
         db.insert(insert_table, value_list)
         db.connection.commit()

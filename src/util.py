@@ -1,4 +1,5 @@
 import io
+import inspect
 import json
 import os
 import psycopg2
@@ -22,21 +23,29 @@ HOSTNAME = os.environ['HOSTNAME']
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-def show_message(msg, newline=True, show_timestamp=True):
+def show_message(_arg_message):
     try:
+        now = datetime.now()
+        hostname = HOSTNAME
+        function = (inspect.stack()[1].filename[:-len(".py")] if inspect.stack()[1].filename.endswith(".py") else inspect.stack()[1].filename) + "." + inspect.stack()[1].function,
+        message = str(_arg_message).strip()
+
         sys.stdout.write(
-            "%s%s%s%s" % (
-                ("%s : " % datetime.now().strftime("%Y-%m-%d %H:%M:%S")) if show_timestamp else "",
-                "[%s]" % HOSTNAME[:4],
-                msg,
-                "\n" if newline else ""))
+            "%s%s%s%s%s" % (
+                ("%s: " % now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]),
+                "[%s] " % hostname[:6],
+                "%s: " % function,
+                message,
+                "\n"
+            )
+        )
         sys.stdout.flush()
 
         body_dict = dict()
-        body_dict['hostname'] = HOSTNAME
-        body_dict['message'] = str(msg)
-        now = datetime.now()
         body_dict['@timestamp'] = now.strftime("%Y-%m-%dT%H:%M:%S.") + "%03d" % (now.microsecond // 1000)
+        body_dict['hostname'] = hostname
+        body_dict['function'] = function
+        body_dict['message'] = message
 
         sender.setup(
                 'awssql.logs',
@@ -46,8 +55,8 @@ def show_message(msg, newline=True, show_timestamp=True):
                 'follow',
                 body_dict)
     except UnicodeEncodeError:
-        show_message(type(e))
-        show_message(e.args)
+        show_message("type(e)=%s" % (type(e)))
+        show_message("e.args=%s" % (e.args))
         traceback.print_exc()
 
 
@@ -67,8 +76,8 @@ class DB:
                 exception_messages = ','.join(exception_message_list)
                 postgres_cannot_connect_server = re.search(r"could not connect to server", exception_messages)
                 if postgres_cannot_connect_server:
-                    show_message(type(e))
-                    show_message(e.args)
+                    show_message("type(e)=%s" % (type(e)))
+                    show_message("e.args=%s" % (e.args))
                     show_message("Retry count is {0}, going to wait {1} second(s).".format(retry_count, retry_count**2))
                     time.sleep(retry_count**2)
                     retry_count += 1
@@ -86,6 +95,7 @@ class DB:
 
     def create(self, _arg_sql_create_statement):
         try:
+            show_message("_arg_sql_create_statement=%s" % (_arg_sql_create_statement))
             self.cursor.execute(_arg_sql_create_statement)
             self.connection.commit()
         except psycopg2.ProgrammingError as e:
@@ -98,8 +108,8 @@ class DB:
             postgres_role_already_exists = re.search(r"role .* already exists", exception_messages)
             cannot_drop_columns_from_view = re.search(r"cannot drop columns from view", exception_messages)
             if postgres_table_already_exists or postgres_schema_already_exists or postgres_role_already_exists or cannot_drop_columns_from_view:
-                show_message(type(e))
-                show_message(e.args)
+                show_message("type(e)=%s" % (type(e)))
+                show_message("e.args=%s" % (e.args))
             else:
                 traceback.print_exc()
                 exit()
@@ -108,6 +118,8 @@ class DB:
     # Expect that value passed as list.
     def insert(self, _arg_sql_insert_statement, _arg_insert_value_list):
         try:
+            show_message("_arg_sql_insert_statement=%s" % (_arg_sql_insert_statement))
+            show_message("_arg_insert_value_list=%s" % (_arg_insert_value_list))
             self.cursor.execute(
                     _arg_sql_insert_statement,
                     _arg_insert_value_list)
@@ -119,8 +131,8 @@ class DB:
             exception_messages = ','.join(exception_message_list)
             postgres_duplicate_entry = re.search(r"duplicate key value violates unique constraint .*", exception_messages)
             if postgres_duplicate_entry:
-                show_message(type(e))
-                show_message(e.args)
+                show_message("type(e)=%s" % (type(e)))
+                show_message("e.args=%s" % (e.args))
             else:
                 traceback.print_exc()
                 exit()
@@ -142,12 +154,13 @@ class DB:
 
     def add_column(self, _arg_table, _arg_column):
         try:
-            add_column_statement = """
-                ALTER TABLE {0}.{1} ADD COLUMN {2} {3};""".format(
-                    "root",
-                    _arg_table,
-                    _arg_column,
-                    "VARCHAR(64)")
+            sql_add_column_statement = "ALTER TABLE {0}.{1} ADD COLUMN {2} {3};".format(
+                "root",
+                _arg_table,
+                _arg_column,
+                "VARCHAR(64)"
+            )
+            show_message("sql_add_column_statement=%s" % (sql_add_column_statement))
             self.cursor.execute(add_column_statement)
             self.connection.commit()
         except psycopg2.ProgrammingError as e:
@@ -155,7 +168,7 @@ class DB:
             for _x in e.args:
                 exception_message_list.append(str(_x))
             exception_messages = ','.join(exception_message_list)
-            print(exception_messages)
+            traceback.print_exc()
             exit()
 
 
