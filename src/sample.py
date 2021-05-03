@@ -13,11 +13,11 @@ _timestamp = int(time.time())
 pseudo_table_dict = {}
 
 db = DB()
-VARCHAR_LENGTH = '64'
 
 def preliminary_task():
     # apis_list = [("********************", "****************************************", "ap-northeast-1", "ec2")]
     apis_list = [("737936301346", "ap-northeast-1", "ec2")]
+    apis_list.append(("737936301346", "ap-northeast-1", "rds"))
     show_message("apis_list=%s" % (apis_list))
     return apis_list
 
@@ -29,8 +29,13 @@ def call_endpoint(_arg_apis_list):
     for _index, _i_api in enumerate(_arg_apis_list):
         # client = boto3.client(_i_api[3], aws_access_key_id=_i_api[0], aws_secret_access_key=_i_api[1], region_name=_i_api[2])
         client = boto3.client(_i_api[2], region_name=_i_api[1])
-        responce = client.describe_instances()
-        # Need consideration of pagination, _index of following implementation do nothing.
+
+        if _i_api[2] == "ec2":
+            responce = client.describe_instances()
+            # Need consideration of pagination, _index of following implementation do nothing.
+        elif _i_api[2] == "rds":
+            responce = client.describe_db_instances()
+
         new_key = _i_api + (_index, )
         d[new_key] = responce
     show_message("d=%s" % (d))
@@ -40,10 +45,17 @@ def extract_instances(_arg_responce):
     instances_dict = {}
     for _k_meta, _v_reservations in _arg_responce.items():
         instance_list = []
-        for reservation in _v_reservations['Reservations']:
-            for instance in reservation['Instances']:
+
+        if _k_meta[2] == "ec2":
+            for reservation in _v_reservations['Reservations']:
+                for instance in reservation['Instances']:
+                    instance_list.append(instance)
+        elif _k_meta[2] == "rds":
+            for instance in _v_reservations['DBInstances']:
                 instance_list.append(instance)
+
         instances_dict[_k_meta] = instance_list
+
     show_message("instances_dict=%s" % (instances_dict))
     return instances_dict
 
@@ -116,8 +128,13 @@ def flatten(_arg_instances):
         # If there were 100+/1000+ instances and pagination happens, is has to be stored with different key in "_arg_instances".
         dummy_index = _k_meta[3]
         for _index_instance_count, _i_instance in enumerate(_v_instance_list):
-            _id = _i_instance["InstanceId"]
-            table_name = "describe_instances"
+            if _k_meta[2] == "ec2":
+                _id = _i_instance["InstanceId"]
+                table_name = "describe_instances"
+            elif _k_meta[2] == "rds":
+                _id = _i_instance["DBInstanceIdentifier"]
+                table_name = "describe_db_instances"
+
             _index = None
             _join_key = None
             flatten_core(
@@ -136,11 +153,9 @@ def insert():
         table_name = _k[4]
         tmp_column_name_list = list(_v.keys())
         column_name_list = map(avoid_key_name, tmp_column_name_list)
-        # print(table_name)
-        # print(_v.keys())
 
-        tmp_create_statement_list = list(map(lambda x : x + " VARCHAR(" + VARCHAR_LENGTH + ")", column_name_list))
-        # print(tmp_create_statement_list)
+        # tmp_create_statement_list = list(map(lambda x : x + " VARCHAR(" + VARCHAR_LENGTH + ")", column_name_list))
+        tmp_create_statement_list = list(map(lambda x : x + " TEXT", column_name_list))
 
         create_table = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_id, _timestamp, _index, _join_key));".format(
             'root',
@@ -192,21 +207,21 @@ def insert():
 
 def main():
     apis_list = preliminary_task()
-    
+
     dump("apis_list.json", apis_list)
-    
+
     responce = call_endpoint(apis_list)
-    
+
     dump("responce.json", responce)
-    
+
     instances = extract_instances(responce)
-    
+
     dump("instances.json", instances)
-    
+
     flatten(instances)
-    
+
     dump("pseudo_table_dict.json", pseudo_table_dict)
-    
+
     insert()
 
 if __name__ == "__main__":

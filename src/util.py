@@ -158,10 +158,10 @@ class DB:
                 "root",
                 _arg_table,
                 _arg_column,
-                "VARCHAR(64)"
+                "TEXT"
             )
             show_message("sql_add_column_statement=%s" % (sql_add_column_statement))
-            self.cursor.execute(add_column_statement)
+            self.cursor.execute(sql_add_column_statement)
             self.connection.commit()
         except psycopg2.ProgrammingError as e:
             exception_message_list = list()
