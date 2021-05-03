@@ -136,13 +136,24 @@ def set_value_to_pseudo_table_dict(_arg_meta_key, _arg_table_name, _arg_index, _
     else:
         pseudo_table_dict[_arg_meta_key] = {}
 
+    meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_arg_meta_key)
+
+    _id = meta_key_in_dict_format.get("_id", None)
+    api_called_at = meta_key_in_dict_format.get("api_called_at", None)
+    _index = meta_key_in_dict_format.get("_index", None)
+    _join_key = meta_key_in_dict_format.get("_join_key", None)
+    account_id = meta_key_in_dict_format.get("account_id", None)
+    region = meta_key_in_dict_format.get("region", None)
+
     # tmp = pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)]
     tmp = pseudo_table_dict[_arg_meta_key]
     tmp[_arg_column_name] = _arg_column_value
-    tmp["_id"] = _arg_id
-    tmp["_timestamp"] = _arg_timestamp
-    tmp["_index"] = _arg_index
-    tmp["_join_key"] = _arg_join_key
+    tmp["_id"] = _id
+    tmp["_timestamp"] = api_called_at
+    tmp["_index"] = _index
+    tmp["_join_key"] = _join_key
+    tmp["_account_id"] = account_id
+    tmp["_region"] = region
     # pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)] = tmp
     pseudo_table_dict[_arg_meta_key] = tmp
 
@@ -156,7 +167,8 @@ def flatten_core(_arg_instance_dict, _arg_table_name, _arg_id, _arg_timestamp, _
         # sets _i_column_name="NetworkInterfaces" and column_value is a list.
         column_value = dig_dict(_arg_instance_dict, _i_column_name, '_')
         column_name = _i_column_name.lower()
-        table_name = _arg_table_name.lower()
+        # table_name = _arg_table_name.lower()
+        table_name = meta_key_in_dict_format.get("table_name", None)
 
         if isinstance(column_value, list):
             _join_key = str(uuid.uuid4())
@@ -215,29 +227,18 @@ def flatten(_arg_instances):
 
 
 def insert():
-    for _k, _v in pseudo_table_dict.items():
-        table_name = _k[4]
-        tmp_column_name_list = list(_v.keys())
-        column_name_list = map(avoid_key_name, tmp_column_name_list)
+    for _k_meta_key, _v in pseudo_table_dict.items():
+        meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_k_meta_key)
+        table_name = meta_key_in_dict_format.get("table_name", None)
 
-        # tmp_create_statement_list = list(map(lambda x : x + " VARCHAR(" + VARCHAR_LENGTH + ")", column_name_list))
-        tmp_create_statement_list = list(map(lambda x : x + " TEXT", column_name_list))
-
-        create_table = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_id, _timestamp, _index, _join_key));".format(
-            'root',
-            table_name,
-            ','.join(tmp_create_statement_list)
-        )
-
-        db.create(create_table)
-        db.connection.commit()
-
+        # tmp_column_name_list = list(_v.keys())
+        # column_name_list = map(avoid_key_name, tmp_column_name_list)
 
         column_name_list = list()
         value_list = list()
-
         id = None
-        for k, v in _v.items():
+        # for k, v in _v.items():
+        for k, v in sorted(_v.items(), key=lambda x:x[0]):
             if len(k) <= 63:
                 if k.lower()== 'primary' or k=='DEFAULT' or k=='END':
                     column_name_list.append('_' + k.lower())
@@ -255,6 +256,21 @@ def insert():
                 show_message(type(e))
                 show_message(e.args)
                 value_list.append('?')
+
+        # tmp_create_statement_list = list(map(lambda x : x + " VARCHAR(" + VARCHAR_LENGTH + ")", column_name_list))
+        tmp_create_statement_list = list(map(lambda x : x + " TEXT", column_name_list))
+
+        create_table = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_account_id, _id, _index, _join_key, _region, _timestamp));".format(
+            'root',
+            table_name,
+            ','.join(tmp_create_statement_list)
+        )
+
+        db.create(create_table)
+        db.connection.commit()
+
+        # moved from here
+
 
         tmp_insert_table = "INSERT INTO {0}.{1} ({2}) VALUES(%s".format(
             'root',
@@ -288,7 +304,6 @@ def main():
     flatten(instances)
 
     dump("pseudo_table_dict.json", pseudo_table_dict)
-    exit()
 
     insert()
 
