@@ -1,5 +1,5 @@
 {
-  "('737936301346', 'ap-northeast-1', 'ec2', 0)": {
+  "(('account_id', '737936301346'), ('api_call_count', 0), ('api_called_at', 1620034212), ('id_attribute_name', 'InstanceId'), ('method', 'describe_instances'), ('region', 'ap-northeast-1'), ('service', 'ec2'))": {
     "Reservations": [
       {
         "Groups": [],
@@ -279,22 +279,22 @@
       }
     ],
     "ResponseMetadata": {
-      "RequestId": "a11006d5-6364-47ca-9bc1-cf77f04248ce",
+      "RequestId": "23e5d6d2-69d4-4f1d-a934-f90508aa6e48",
       "HTTPStatusCode": 200,
       "HTTPHeaders": {
-        "x-amzn-requestid": "a11006d5-6364-47ca-9bc1-cf77f04248ce",
+        "x-amzn-requestid": "23e5d6d2-69d4-4f1d-a934-f90508aa6e48",
         "cache-control": "no-cache, no-store",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
         "content-type": "text/xml;charset=UTF-8",
         "transfer-encoding": "chunked",
         "vary": "accept-encoding",
-        "date": "Mon, 03 May 2021 05:16:35 GMT",
+        "date": "Mon, 03 May 2021 09:30:11 GMT",
         "server": "AmazonEC2"
       },
       "RetryAttempts": 0
     }
   },
-  "('737936301346', 'ap-northeast-1', 'rds', 1)": {
+  "(('account_id', '737936301346'), ('api_call_count', 1), ('api_called_at', 1620034212), ('id_attribute_name', 'DBInstanceIdentifier'), ('method', 'describe_db_instances'), ('region', 'ap-northeast-1'), ('service', 'rds'))": {
     "DBInstances": [
       {
         "DBInstanceIdentifier": "database-1",
@@ -385,14 +385,14 @@
       }
     ],
     "ResponseMetadata": {
-      "RequestId": "7e6c7eb4-6ce3-4cbd-997d-3280cda590f9",
+      "RequestId": "f5997c19-421c-4cc0-b483-5d99e859717d",
       "HTTPStatusCode": 200,
       "HTTPHeaders": {
-        "x-amzn-requestid": "7e6c7eb4-6ce3-4cbd-997d-3280cda590f9",
+        "x-amzn-requestid": "f5997c19-421c-4cc0-b483-5d99e859717d",
         "content-type": "text/xml",
         "content-length": "4621",
         "vary": "accept-encoding",
-        "date": "Mon, 03 May 2021 05:16:35 GMT"
+        "date": "Mon, 03 May 2021 09:30:12 GMT"
       },
       "RetryAttempts": 0
     }

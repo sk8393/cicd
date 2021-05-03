@@ -1,12 +1,46 @@
 [
   [
-    "737936301346",
-    "ap-northeast-1",
-    "ec2"
+    [
+      "account_id",
+      "737936301346"
+    ],
+    [
+      "id_attribute_name",
+      "InstanceId"
+    ],
+    [
+      "method",
+      "describe_instances"
+    ],
+    [
+      "region",
+      "ap-northeast-1"
+    ],
+    [
+      "service",
+      "ec2"
+    ]
   ],
   [
-    "737936301346",
-    "ap-northeast-1",
-    "rds"
+    [
+      "account_id",
+      "737936301346"
+    ],
+    [
+      "id_attribute_name",
+      "DBInstanceIdentifier"
+    ],
+    [
+      "method",
+      "describe_db_instances"
+    ],
+    [
+      "region",
+      "ap-northeast-1"
+    ],
+    [
+      "service",
+      "rds"
+    ]
   ]
 ]
