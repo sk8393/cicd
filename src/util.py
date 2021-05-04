@@ -93,11 +93,29 @@ class DB:
         self.connection.close()
 
 
-    def create(self, _arg_sql_create_statement):
+    def create(self, _arg_sql_create_statement, _arg_parent_table=None, _arg_parent_column=None):
         try:
             show_message("_arg_sql_create_statement=%s" % (_arg_sql_create_statement))
             self.cursor.execute(_arg_sql_create_statement)
             self.connection.commit()
+        except psycopg2.errors.InvalidForeignKey as e:
+            exception_message_list = list()
+            for _x in e.args:
+                exception_message_list.append(str(_x))
+            exception_messages = ','.join(exception_message_list)
+            no_unique_constraint = re.search(r"there is no unique constraint matching given keys for referenced table \"(\w*?)\"", exception_messages)
+            if no_unique_constraint:
+                self.connection.commit()
+                referenced_table = no_unique_constraint.group(1)
+                if _arg_parent_table and referenced_table == _arg_parent_table:
+                    self.add_unique(_arg_parent_table, _arg_parent_column)
+                    self.create(_arg_sql_create_statement, _arg_parent_table=_arg_parent_table, _arg_parent_column=_arg_parent_column)
+                else:
+                    traceback.print_exc()
+                    exit()
+            else:
+                traceback.print_exc()
+                exit()
         except psycopg2.ProgrammingError as e:
             exception_message_list = list()
             for _x in e.args:
@@ -113,7 +131,6 @@ class DB:
             else:
                 traceback.print_exc()
                 exit()
-
 
     # Expect that value passed as list.
     def insert(self, _arg_sql_insert_statement, _arg_insert_value_list):
@@ -141,7 +158,6 @@ class DB:
             for _x in e.args:
                 exception_message_list.append(str(_x))
             exception_messages = ','.join(exception_message_list)
-            print(exception_messages)
             column_does_not_exist = re.search(r"column \"(\w*?)\" of relation \"(\w*?)\" does not exist", exception_messages)
             if column_does_not_exist:
                 self.connection.commit()
@@ -150,6 +166,7 @@ class DB:
                 self.add_column(table, column)
                 self.insert(_arg_sql_insert_statement, _arg_insert_value_list)
             else:
+                traceback.print_exc()
                 exit()
 
     def add_column(self, _arg_table, _arg_column):
@@ -171,6 +188,15 @@ class DB:
             traceback.print_exc()
             exit()
 
+    def add_unique(self, _arg_parent_table, _arg_parent_column):
+        sql_add_unique_statement = "ALTER TABLE {0}.{1} ADD UNIQUE({2});".format(
+            "root",
+            _arg_parent_table,
+            _arg_parent_column
+        )
+        show_message("sql_add_unique_statement=%s" % (sql_add_unique_statement))
+        self.cursor.execute(sql_add_unique_statement)
+        self.connection.commit()
 
 def json_serial(obj):
     if isinstance(obj, (datetime, date)):

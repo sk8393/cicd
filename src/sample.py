@@ -220,6 +220,8 @@ def insert():
     for _k_meta_key, _v in sorted(pseudo_table_dict.items(), key=lambda x:len(dict(x[0])["table_name"])):
         meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_k_meta_key)
         table_name = meta_key_in_dict_format.get("table_name", None)
+        parent_table = meta_key_in_dict_format.get("parent_table", None)
+        parent_column = meta_key_in_dict_format.get("parent_column", None)
 
         column_name_list = list()
         value_list = list()
@@ -245,13 +247,16 @@ def insert():
 
         tmp_create_statement_list = list(map(lambda x : x + " TEXT", column_name_list))
 
+        if parent_table:
+            tmp_create_statement_list = list(map(lambda x : "_join_key TEXT REFERENCES {0}.{1}({2})".format('root', parent_table, parent_column) if x=="_join_key TEXT" else x, tmp_create_statement_list))
+
         create_table = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_account_id, _id, _index, _join_key, _region, _timestamp));".format(
             'root',
             table_name,
             ','.join(tmp_create_statement_list)
         )
 
-        db.create(create_table)
+        db.create(create_table, _arg_parent_table=parent_table, _arg_parent_column=parent_column)
         db.connection.commit()
 
         tmp_insert_table = "INSERT INTO {0}.{1} ({2}) VALUES(%s".format(
