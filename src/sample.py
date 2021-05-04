@@ -213,7 +213,11 @@ def flatten(_arg_instances):
 
 
 def insert():
-    for _k_meta_key, _v in pseudo_table_dict.items():
+    # To introduce foreign key and associate tables each other, parent table has to be created first.
+    # For example, "ec2_describe_instances" is a parent and "ec2_describe_instances_blockdevicemappings" is a child.
+    # To confine exception to only UNIQUE constraint (as no need to care about "(parent) table does not exist" error), parent table is expected to be created beforehand.
+    # As of implementation on 2021-05-04, table_name of parent table is shorter than that of child.
+    for _k_meta_key, _v in sorted(pseudo_table_dict.items(), key=lambda x:len(dict(x[0])["table_name"])):
         meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_k_meta_key)
         table_name = meta_key_in_dict_format.get("table_name", None)
 
