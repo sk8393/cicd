@@ -156,6 +156,12 @@ def flatten_core(_arg_instance_dict, _arg_table_name, _arg_meta_key):
         if isinstance(column_value, list):
             join_key = str(uuid.uuid4())
             meta_key_in_dict_format["join_key"] = join_key
+            set_value_to_pseudo_table_dict(
+                _arg_meta_key,
+                column_name,
+                join_key
+            )
+
             # "SecurityGroups":[{"GroupName":"sk8393-sg-172.31.0.0.16-step"},{"GroupName":"sk8393-sg-172.31.0.0.16-webhook-github"}]
             # will be broken down as below:
             # {"GroupName":"sk8393-sg-172.31.0.0.16-step"}           - _index_of_array=0
@@ -163,17 +169,14 @@ def flatten_core(_arg_instance_dict, _arg_table_name, _arg_meta_key):
             for _index_of_array, _i_instance_partial_dict in enumerate(column_value):
                 meta_key_in_dict_format["index_of_array"] = _index_of_array
                 meta_key_in_dict_format["table_name"] = (_arg_table_name + "_" + _i_column_name).lower()
-                meta_key = convert_to_meta_key(meta_key_in_dict_format)
-                set_value_to_pseudo_table_dict(
-                    _arg_meta_key,
-                    column_name,
-                    join_key
-                )
+                meta_key_in_dict_format["parent_table"] = _arg_table_name.lower()
+                meta_key_in_dict_format["parent_column"] = _i_column_name.lower()
+                new_meta_key = convert_to_meta_key(meta_key_in_dict_format)
 
                 flatten_core(
                     _i_instance_partial_dict,
                     _arg_table_name + "_" + _i_column_name,
-                    meta_key
+                    new_meta_key
                 )
         else:
             set_value_to_pseudo_table_dict(
@@ -194,11 +197,11 @@ def flatten(_arg_instances):
         for _index_instance_count, _i_instance in enumerate(_v_instance_list):
             meta_key_in_dict_format["id"] = _i_instance[id_attribute_name]
             table_name = "{0}_{1}".format(service.lower(), method.lower())
-            meta_key_in_dict_format["table_name"] = "{0}_{1}".format(service.lower(), method.lower())
-
-            index_of_array = None
-            meta_key_in_dict_format["index_of_array"] = index_of_array
+            meta_key_in_dict_format["table_name"] = table_name
+            meta_key_in_dict_format["index_of_array"] = None
             meta_key_in_dict_format["join_key"] = None
+            meta_key_in_dict_format["parent_table"] = None
+            meta_key_in_dict_format["parent_column"] = None
             meta_key = convert_to_meta_key(meta_key_in_dict_format)
 
             flatten_core(
