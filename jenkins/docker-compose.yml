@@ -31,6 +31,7 @@ services:
   postgres:
     image: 'sk8393/postgres:test'
     container_name: postgres
+    hostname: postgres
     deploy:
       replicas: 1
     ports:
@@ -46,6 +47,7 @@ services:
   requester:
     image: 'sk8393/requester:test'
     container_name: requester
+    hostname: requester
     deploy:
       replicas: 1
     volumes:
@@ -54,6 +56,7 @@ services:
   tester:
     image: 'sk8393/tester:test'
     container_name: tester
+    hostname: tester
     deploy:
       replicas: 1
     ports:
@@ -64,6 +67,7 @@ services:
   cloud9:
     image: 'sk8393/cloud9:test'
     container_name: cloud9
+    hostname: cloud9
     deploy:
       replicas: 1
     ports:
