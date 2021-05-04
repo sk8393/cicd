@@ -8,8 +8,6 @@ from util import DB
 from util import dump
 from util import show_message
 
-_timestamp = int(time.time())
-
 pseudo_table_dict = {}
 
 db = DB()
@@ -99,13 +97,6 @@ def extract_instances(_arg_responce):
     return instances_dict
 
 
-def avoid_key_name(_arg_column_name):
-    if _arg_column_name.lower() == "primary":
-        return "_primary"
-    else:
-        return _arg_column_name
-
-
 def get_dict_hierarchy(target_dict, root_path, sep):
     if isinstance(target_dict, dict):
         for key in target_dict.keys():
@@ -125,12 +116,7 @@ def dig_dict(target_dict, target_branch, sep):
     return leaf
 
 
-def set_value_to_pseudo_table_dict(_arg_meta_key, _arg_table_name, _arg_index, _arg_column_name, _arg_column_value, _arg_id, _arg_timestamp, _arg_join_key, _arg_instance_count):
-    #try:
-    #    pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)]
-    #except KeyError:
-    #    pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)] = {}
-
+def set_value_to_pseudo_table_dict(_arg_meta_key, _arg_column_name, _arg_column_value):
     if _arg_meta_key in pseudo_table_dict:
         pass
     else:
@@ -138,27 +124,25 @@ def set_value_to_pseudo_table_dict(_arg_meta_key, _arg_table_name, _arg_index, _
 
     meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_arg_meta_key)
 
-    _id = meta_key_in_dict_format.get("_id", None)
+    id = meta_key_in_dict_format.get("id", None)
     api_called_at = meta_key_in_dict_format.get("api_called_at", None)
-    _index = meta_key_in_dict_format.get("_index", None)
-    _join_key = meta_key_in_dict_format.get("_join_key", None)
+    index_of_array = meta_key_in_dict_format.get("index_of_array", None)
+    join_key = meta_key_in_dict_format.get("join_key", None)
     account_id = meta_key_in_dict_format.get("account_id", None)
     region = meta_key_in_dict_format.get("region", None)
 
-    # tmp = pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)]
     tmp = pseudo_table_dict[_arg_meta_key]
     tmp[_arg_column_name] = _arg_column_value
-    tmp["_id"] = _id
+    tmp["_id"] = id
     tmp["_timestamp"] = api_called_at
-    tmp["_index"] = _index
-    tmp["_join_key"] = _join_key
+    tmp["_index"] = index_of_array
+    tmp["_join_key"] = join_key
     tmp["_account_id"] = account_id
     tmp["_region"] = region
-    # pseudo_table_dict[_arg_meta_key + (_arg_table_name, _arg_index, _arg_instance_count)] = tmp
     pseudo_table_dict[_arg_meta_key] = tmp
 
 
-def flatten_core(_arg_instance_dict, _arg_table_name, _arg_id, _arg_timestamp, _arg_index, _arg_join_key, _arg_meta_key, _arg_instance_count):
+def flatten_core(_arg_instance_dict, _arg_table_name, _arg_meta_key):
     meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_arg_meta_key)
     for _i_column_name in list(get_dict_hierarchy(_arg_instance_dict, '', '_')):
         # "Placement":{"AvailabilityZone":"ap-northeast-1c"}
@@ -167,61 +151,60 @@ def flatten_core(_arg_instance_dict, _arg_table_name, _arg_id, _arg_timestamp, _
         # sets _i_column_name="NetworkInterfaces" and column_value is a list.
         column_value = dig_dict(_arg_instance_dict, _i_column_name, '_')
         column_name = _i_column_name.lower()
-        # table_name = _arg_table_name.lower()
         table_name = meta_key_in_dict_format.get("table_name", None)
 
         if isinstance(column_value, list):
-            _join_key = str(uuid.uuid4())
-            meta_key_in_dict_format["_join_key"] = _join_key
+            join_key = str(uuid.uuid4())
+            meta_key_in_dict_format["join_key"] = join_key
             # "SecurityGroups":[{"GroupName":"sk8393-sg-172.31.0.0.16-step"},{"GroupName":"sk8393-sg-172.31.0.0.16-webhook-github"}]
             # will be broken down as below:
             # {"GroupName":"sk8393-sg-172.31.0.0.16-step"}           - _index_of_array=0
             # {"GroupName":"sk8393-sg-172.31.0.0.16-webhook-github"} - _index_of_array=1
             for _index_of_array, _i_instance_partial_dict in enumerate(column_value):
-                meta_key_in_dict_format["_index"] = _index_of_array
+                meta_key_in_dict_format["index_of_array"] = _index_of_array
                 meta_key_in_dict_format["table_name"] = (_arg_table_name + "_" + _i_column_name).lower()
                 meta_key = convert_to_meta_key(meta_key_in_dict_format)
-                set_value_to_pseudo_table_dict(_arg_meta_key, table_name, _arg_index, column_name, _join_key, _arg_id, _arg_timestamp, _arg_join_key, _arg_instance_count)
+                set_value_to_pseudo_table_dict(
+                    _arg_meta_key,
+                    column_name,
+                    join_key
+                )
 
-                flatten_core(_i_instance_partial_dict, _arg_table_name + "_" + _i_column_name, _arg_id, _arg_timestamp, _index_of_array, _join_key, meta_key, _arg_instance_count)
+                flatten_core(
+                    _i_instance_partial_dict,
+                    _arg_table_name + "_" + _i_column_name,
+                    meta_key
+                )
         else:
-            set_value_to_pseudo_table_dict(_arg_meta_key, table_name, _arg_index, column_name, column_value, _arg_id, _arg_timestamp, _arg_join_key, _arg_instance_count)
+            set_value_to_pseudo_table_dict(
+                _arg_meta_key,
+                column_name,
+                column_value
+            )
 
 
 def flatten(_arg_instances):
     for _k_meta_key, _v_instance_list in _arg_instances.items():
         meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_k_meta_key)
 
-        account_id = meta_key_in_dict_format.get("account_id", None)
-        api_call_count = meta_key_in_dict_format.get("api_call_count", None)
-        api_called_at = meta_key_in_dict_format.get("api_called_at", None)
         id_attribute_name = meta_key_in_dict_format.get("id_attribute_name", None)
         method = meta_key_in_dict_format.get("method", None)
-        region = meta_key_in_dict_format.get("region", None)
         service = meta_key_in_dict_format.get("service", None)
 
         for _index_instance_count, _i_instance in enumerate(_v_instance_list):
-            _id = _i_instance[id_attribute_name]
-            meta_key_in_dict_format["_id"] = _i_instance[id_attribute_name]
+            meta_key_in_dict_format["id"] = _i_instance[id_attribute_name]
             table_name = "{0}_{1}".format(service.lower(), method.lower())
             meta_key_in_dict_format["table_name"] = "{0}_{1}".format(service.lower(), method.lower())
 
-            _index = None
-            meta_key_in_dict_format["_index"] = None
-            _join_key = None
-            meta_key_in_dict_format["_join_key"] = None
+            index_of_array = None
+            meta_key_in_dict_format["index_of_array"] = index_of_array
+            meta_key_in_dict_format["join_key"] = None
             meta_key = convert_to_meta_key(meta_key_in_dict_format)
 
             flatten_core(
                 _i_instance,
                 table_name,
-                _id,
-                _timestamp,
-                _index,
-                _join_key,
-                # _k_meta_key,
-                meta_key,
-                _index_instance_count)
+                meta_key)
 
     return {}
 
@@ -231,13 +214,9 @@ def insert():
         meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_k_meta_key)
         table_name = meta_key_in_dict_format.get("table_name", None)
 
-        # tmp_column_name_list = list(_v.keys())
-        # column_name_list = map(avoid_key_name, tmp_column_name_list)
-
         column_name_list = list()
         value_list = list()
         id = None
-        # for k, v in _v.items():
         for k, v in sorted(_v.items(), key=lambda x:x[0]):
             if len(k) <= 63:
                 if k.lower()== 'primary' or k=='DEFAULT' or k=='END':
@@ -257,7 +236,6 @@ def insert():
                 show_message(e.args)
                 value_list.append('?')
 
-        # tmp_create_statement_list = list(map(lambda x : x + " VARCHAR(" + VARCHAR_LENGTH + ")", column_name_list))
         tmp_create_statement_list = list(map(lambda x : x + " TEXT", column_name_list))
 
         create_table = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_account_id, _id, _index, _join_key, _region, _timestamp));".format(
@@ -268,9 +246,6 @@ def insert():
 
         db.create(create_table)
         db.connection.commit()
-
-        # moved from here
-
 
         tmp_insert_table = "INSERT INTO {0}.{1} ({2}) VALUES(%s".format(
             'root',
@@ -290,19 +265,15 @@ def insert():
 
 def main():
     apis_list = preliminary_task()
-
     dump("apis_list.json", apis_list)
 
     responce = call_endpoint(apis_list)
-
     dump("responce.json", responce)
 
     instances = extract_instances(responce)
-
     dump("instances.json", instances)
 
     flatten(instances)
-
     dump("pseudo_table_dict.json", pseudo_table_dict)
 
     insert()
