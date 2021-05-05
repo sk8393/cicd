@@ -5,6 +5,7 @@ import time
 import uuid
 
 from util import DB
+from util import DB_ROOT_SCHEMA
 from util import dump
 from util import show_message
 
@@ -15,7 +16,7 @@ db = DB()
 # terminology
 # meta_key: 
 # column_name: 
-# value: 
+# column_value: 
 
 def convert_to_meta_key(_arg_meta_key_in_dict_format):
     meta_key = tuple(sorted(list(_arg_meta_key_in_dict_format.items())))
@@ -256,26 +257,19 @@ def insert():
         if parent_table:
             column_name_list_with_data_type = list(
                 map(
-                    lambda x : "_join_key TEXT REFERENCES {0}.{1}({2})".format('root', parent_table, parent_column) if x=="_join_key TEXT" else x,
+                    lambda x : "_join_key TEXT REFERENCES {0}.{1}({2})".format(DB_ROOT_SCHEMA, parent_table, parent_column) if x=="_join_key TEXT" else x,
                     column_name_list_with_data_type
                 )
             )
 
         sql_create_table_statement = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_account_id, _id, _index, _join_key, _region, _timestamp));".format(
-            'root',
+            DB_ROOT_SCHEMA,
             table_name,
             ','.join(column_name_list_with_data_type)
         )
 
-        db.create(
-            sql_create_table_statement,
-            _arg_parent_table=parent_table,
-            _arg_parent_column=parent_column
-        )
-        db.connection.commit()
-
         partial_sql_insert_statement = "INSERT INTO {0}.{1} ({2}) VALUES(%s".format(
-            'root',
+            DB_ROOT_SCHEMA,
             table_name,
             ','.join(column_name_list)
         )
@@ -284,8 +278,14 @@ def insert():
             partial_sql_insert_statement += ', %s'
         sql_insert_statement = partial_sql_insert_statement + ');'
 
-        db.insert(sql_insert_statement, column_value_list)
-        db.connection.commit()
+        arg = {
+            "_arg_sql_insert_statement":sql_insert_statement,
+            "_arg_insert_value_list":column_value_list,
+            "_arg_sql_create_statement":sql_create_table_statement,
+            "_arg_parent_table":parent_table,
+            "_arg_parent_column":parent_column,
+        }
+        db.enhanced_insert(**arg)
 
 
 def main():

@@ -23,6 +23,27 @@ HOSTNAME = os.environ['HOSTNAME']
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
+def json_serial(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+
+def dump(_arg_file_name, _arg_object):
+    f = open(_arg_file_name, "w")
+    if isinstance(_arg_object, dict):
+        d = {}
+        for _k, _v in _arg_object.items():
+            if isinstance(_k, tuple):
+                d[str(_k)] = _v
+            else:
+                d[_k] = _v
+        json.dump(d, f, default=json_serial, indent=2)
+    else:
+        json.dump(_arg_object, f, default=json_serial, indent=2)
+    f.close()
+
+
 def show_message(_arg_message):
     try:
         now = datetime.now()
@@ -66,8 +87,14 @@ class DB:
         while retry_count <= int(DB_CONNECTION_RETRY):
             try:
                 self.connection = psycopg2.connect(
-                        "host={0} port={1} user={2} password={3} dbname={4}"
-                        .format(DB_HOST, DB_PORT, _arg_user, _arg_password, DB_NAME))
+                    "host={0} port={1} user={2} password={3} dbname={4}".format(
+                        DB_HOST,
+                        DB_PORT,
+                        _arg_user,
+                        _arg_password,
+                        DB_NAME
+                    )
+                )
                 break
             except psycopg2.OperationalError as e:
                 exception_message_list = list()
@@ -85,6 +112,7 @@ class DB:
                     traceback.print_exc()
                     exit()
 
+        self.connection.autocommit = True
         self.cursor = self.connection.cursor()
 
 
@@ -93,74 +121,66 @@ class DB:
         self.connection.close()
 
 
+    def get_exception_messages(self, _arg_exception):
+        exception_message_list = list()
+        for _i_exception in _arg_exception.args:
+            exception_message_list.append(str(_i_exception))
+        exception_messages = ','.join(exception_message_list)
+        show_message("exception_messages=%s" % (exception_messages))
+        return exception_messages
+
+
     def create(self, _arg_sql_create_statement, _arg_parent_table=None, _arg_parent_column=None):
         try:
             show_message("_arg_sql_create_statement=%s" % (_arg_sql_create_statement))
             self.cursor.execute(_arg_sql_create_statement)
-            self.connection.commit()
         except psycopg2.errors.InvalidForeignKey as e:
-            exception_message_list = list()
-            for _x in e.args:
-                exception_message_list.append(str(_x))
-            exception_messages = ','.join(exception_message_list)
-            no_unique_constraint = re.search(r"there is no unique constraint matching given keys for referenced table \"(\w*?)\"", exception_messages)
+            exception_messages = self.get_exception_messages(e)
+            no_unique_constraint = re.search(
+                r"there is no unique constraint matching given keys for referenced table \"(\w*?)\"",
+                exception_messages
+            )
             if no_unique_constraint:
-                self.connection.commit()
-                referenced_table = no_unique_constraint.group(1)
-                if _arg_parent_table and referenced_table == _arg_parent_table:
-                    self.add_unique(_arg_parent_table, _arg_parent_column)
-                    self.create(_arg_sql_create_statement, _arg_parent_table=_arg_parent_table, _arg_parent_column=_arg_parent_column)
-                else:
-                    traceback.print_exc()
-                    exit()
+                # referenced_table = no_unique_constraint.group(1)
+                self.add_unique(_arg_parent_table, _arg_parent_column)
+                self.create(
+                    _arg_sql_create_statement,
+                    _arg_parent_table=_arg_parent_table,
+                    _arg_parent_column=_arg_parent_column
+                )
             else:
                 traceback.print_exc()
                 exit()
         except psycopg2.ProgrammingError as e:
-            exception_message_list = list()
-            for _x in e.args:
-                exception_message_list.append(str(_x))
-            exception_messages = ','.join(exception_message_list)
-            postgres_table_already_exists = re.search(r"relation .* already", exception_messages)
-            postgres_schema_already_exists = re.search(r"schema .* already exists", exception_messages)
-            postgres_role_already_exists = re.search(r"role .* already exists", exception_messages)
+            exception_messages = self.get_exception_messages(e)
+            relation_already_exists = re.search(r"relation .* already exists", exception_messages)
+            schema_already_exists = re.search(r"schema .* already exists", exception_messages)
+            role_already_exists = re.search(r"role .* already exists", exception_messages)
             cannot_drop_columns_from_view = re.search(r"cannot drop columns from view", exception_messages)
-            if postgres_table_already_exists or postgres_schema_already_exists or postgres_role_already_exists or cannot_drop_columns_from_view:
-                show_message("type(e)=%s" % (type(e)))
-                show_message("e.args=%s" % (e.args))
+            if relation_already_exists or schema_already_exists or role_already_exists or cannot_drop_columns_from_view:
+                pass
             else:
                 traceback.print_exc()
                 exit()
 
-    # Expect that value passed as list.
+
     def insert(self, _arg_sql_insert_statement, _arg_insert_value_list):
         try:
             show_message("_arg_sql_insert_statement=%s" % (_arg_sql_insert_statement))
             show_message("_arg_insert_value_list=%s" % (_arg_insert_value_list))
-            self.cursor.execute(
-                    _arg_sql_insert_statement,
-                    _arg_insert_value_list)
-            self.connection.commit()
+            self.cursor.execute(_arg_sql_insert_statement, _arg_insert_value_list)
         except psycopg2.IntegrityError as e:
-            exception_message_list = list()
-            for _x in e.args:
-                exception_message_list.append(str(_x))
-            exception_messages = ','.join(exception_message_list)
-            postgres_duplicate_entry = re.search(r"duplicate key value violates unique constraint .*", exception_messages)
-            if postgres_duplicate_entry:
-                show_message("type(e)=%s" % (type(e)))
-                show_message("e.args=%s" % (e.args))
+            exception_messages = self.get_exception_messages(e)
+            duplicate_key_value_violates_unique_constraint = re.search(r"duplicate key value violates unique constraint .*", exception_messages)
+            if duplicate_key_value_violates_unique_constraint:
+                pass
             else:
                 traceback.print_exc()
                 exit()
         except psycopg2.errors.UndefinedColumn as e:
-            exception_message_list = list()
-            for _x in e.args:
-                exception_message_list.append(str(_x))
-            exception_messages = ','.join(exception_message_list)
+            exception_messages = self.get_exception_messages(e)
             column_does_not_exist = re.search(r"column \"(\w*?)\" of relation \"(\w*?)\" does not exist", exception_messages)
             if column_does_not_exist:
-                self.connection.commit()
                 column = column_does_not_exist.group(1)
                 table = column_does_not_exist.group(2)
                 self.add_column(table, column)
@@ -169,51 +189,33 @@ class DB:
                 traceback.print_exc()
                 exit()
 
+
+    def enhanced_insert(self, _arg_sql_insert_statement, _arg_insert_value_list, _arg_sql_create_statement, _arg_parent_table, _arg_parent_column):
+        self.create(
+            _arg_sql_create_statement,
+            _arg_parent_table=_arg_parent_table,
+            _arg_parent_column=_arg_parent_column
+        )
+
+        self.insert(_arg_sql_insert_statement, _arg_insert_value_list)
+
+
     def add_column(self, _arg_table, _arg_column):
-        try:
-            sql_add_column_statement = "ALTER TABLE {0}.{1} ADD COLUMN {2} {3};".format(
-                "root",
-                _arg_table,
-                _arg_column,
-                "TEXT"
-            )
-            show_message("sql_add_column_statement=%s" % (sql_add_column_statement))
-            self.cursor.execute(sql_add_column_statement)
-            self.connection.commit()
-        except psycopg2.ProgrammingError as e:
-            exception_message_list = list()
-            for _x in e.args:
-                exception_message_list.append(str(_x))
-            exception_messages = ','.join(exception_message_list)
-            traceback.print_exc()
-            exit()
+        sql_add_column_statement = "ALTER TABLE {0}.{1} ADD COLUMN {2} {3};".format(
+            DB_ROOT_SCHEMA,
+            _arg_table,
+            _arg_column,
+            "TEXT"
+        )
+        show_message("sql_add_column_statement=%s" % (sql_add_column_statement))
+        self.cursor.execute(sql_add_column_statement)
+
 
     def add_unique(self, _arg_parent_table, _arg_parent_column):
         sql_add_unique_statement = "ALTER TABLE {0}.{1} ADD UNIQUE({2});".format(
-            "root",
+            DB_ROOT_SCHEMA,
             _arg_parent_table,
             _arg_parent_column
         )
         show_message("sql_add_unique_statement=%s" % (sql_add_unique_statement))
         self.cursor.execute(sql_add_unique_statement)
-        self.connection.commit()
-
-def json_serial(obj):
-    if isinstance(obj, (datetime, date)):
-        return obj.isoformat()
-    raise TypeError ("Type %s not serializable" % type(obj))
-
-
-def dump(_arg_file_name, _arg_object):
-    f = open(_arg_file_name, "w")
-    if isinstance(_arg_object, dict):
-        d = {}
-        for _k, _v in _arg_object.items():
-            if isinstance(_k, tuple):
-                d[str(_k)] = _v
-            else:
-                d[_k] = _v
-        json.dump(d, f, default=json_serial, indent=2)
-    else:
-        json.dump(_arg_object, f, default=json_serial, indent=2)
-    f.close()
