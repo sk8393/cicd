@@ -14,6 +14,8 @@ db = DB()
 
 # terminology
 # meta_key: 
+# column_name: 
+# value: 
 
 def convert_to_meta_key(_arg_meta_key_in_dict_format):
     meta_key = tuple(sorted(list(_arg_meta_key_in_dict_format.items())))
@@ -217,61 +219,72 @@ def insert():
     # For example, "ec2_describe_instances" is a parent and "ec2_describe_instances_blockdevicemappings" is a child.
     # To confine exception to only UNIQUE constraint (as no need to care about "(parent) table does not exist" error), parent table is expected to be created beforehand.
     # As of implementation on 2021-05-04, table_name of parent table is shorter than that of child.
-    for _k_meta_key, _v in sorted(pseudo_table_dict.items(), key=lambda x:len(dict(x[0])["table_name"])):
+    for _k_meta_key, _v_column_name_column_value_pair in sorted(pseudo_table_dict.items(), key=lambda x:len(dict(x[0])["table_name"])):
         meta_key_in_dict_format = convert_to_meta_key_in_dict_format(_k_meta_key)
         table_name = meta_key_in_dict_format.get("table_name", None)
         parent_table = meta_key_in_dict_format.get("parent_table", None)
         parent_column = meta_key_in_dict_format.get("parent_column", None)
 
         column_name_list = list()
-        value_list = list()
-        id = None
-        for k, v in sorted(_v.items(), key=lambda x:x[0]):
-            if len(k) <= 63:
-                if k.lower()== 'primary' or k=='DEFAULT' or k=='END':
-                    column_name_list.append('_' + k.lower())
+        column_value_list = list()
+        for _k_column_name, _v_column_value in sorted(_v_column_name_column_value_pair.items(), key=lambda x:x[0]):
+            column_name = _k_column_name.lower()
+
+            if len(column_name) <= 63:
+                if column_name=='primary' or column_name=='default' or column_name=='end':
+                    column_name_list.append(column_name + '_')
                 else:
-                    column_name_list.append(k.lower())
+                    column_name_list.append(column_name)
             else:
                 # Column length is up to 63, this is restriction of PostgreSQL.
                 # Inserting another if block is annoying, so just set 63 at here.
                 # So, some column name might be truncated.
-                column_name_list.append(k[-63:])
+                column_name_list.append(column_name[-63:])
+
             try:
-                str(v).encode('ascii')
-                value_list.append(str(v))
+                str(_v_column_value).encode('ascii')
+                column_value_list.append(str(_v_column_value))
             except UnicodeEncodeError as e:
                 show_message(type(e))
                 show_message(e.args)
-                value_list.append('?')
+                column_value_list.append('?')
 
-        tmp_create_statement_list = list(map(lambda x : x + " TEXT", column_name_list))
+        column_name_list_with_data_type = list(map(lambda x : x + " TEXT", column_name_list))
 
+        # For example, "ec2_describe_instances" is a parent and "ec2_describe_instances_blockdevicemappings" is a child.
+        # To refer "ec2_describe_instances" from "ec2_describe_instances_blockdevicemappings", it has to be specified in CREATE TABLE statement.
         if parent_table:
-            tmp_create_statement_list = list(map(lambda x : "_join_key TEXT REFERENCES {0}.{1}({2})".format('root', parent_table, parent_column) if x=="_join_key TEXT" else x, tmp_create_statement_list))
+            column_name_list_with_data_type = list(
+                map(
+                    lambda x : "_join_key TEXT REFERENCES {0}.{1}({2})".format('root', parent_table, parent_column) if x=="_join_key TEXT" else x,
+                    column_name_list_with_data_type
+                )
+            )
 
-        create_table = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_account_id, _id, _index, _join_key, _region, _timestamp));".format(
+        sql_create_table_statement = "CREATE TABLE IF NOT EXISTS {0}.{1}({2}, PRIMARY KEY(_account_id, _id, _index, _join_key, _region, _timestamp));".format(
             'root',
             table_name,
-            ','.join(tmp_create_statement_list)
+            ','.join(column_name_list_with_data_type)
         )
 
-        db.create(create_table, _arg_parent_table=parent_table, _arg_parent_column=parent_column)
+        db.create(
+            sql_create_table_statement,
+            _arg_parent_table=parent_table,
+            _arg_parent_column=parent_column
+        )
         db.connection.commit()
 
-        tmp_insert_table = "INSERT INTO {0}.{1} ({2}) VALUES(%s".format(
+        partial_sql_insert_statement = "INSERT INTO {0}.{1} ({2}) VALUES(%s".format(
             'root',
             table_name,
-            ','.join(list(map(lambda x : x.lower(), column_name_list)))
+            ','.join(column_name_list)
         )
 
-        count = 1
-        for _x in range(1, len(column_name_list)):
-            tmp_insert_table += ', %s'
-            count += 1
-        insert_table = tmp_insert_table + ');'
+        for _x in range(len(column_name_list)-1):
+            partial_sql_insert_statement += ', %s'
+        sql_insert_statement = partial_sql_insert_statement + ');'
 
-        db.insert(insert_table, value_list)
+        db.insert(sql_insert_statement, column_value_list)
         db.connection.commit()
 
 
