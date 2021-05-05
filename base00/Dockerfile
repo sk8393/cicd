@@ -71,6 +71,7 @@ RUN rm /usr/bin/python \
 RUN pip install boto3
 RUN pip install fluent-logger
 RUN pip install psycopg2-binary
+RUN pip install requests
 RUN rm -rf /var/lib/apt/lists/*
 RUN chmod u+x /usr/local/bin/init.sh
 
